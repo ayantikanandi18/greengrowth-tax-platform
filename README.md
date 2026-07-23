@@ -4,6 +4,8 @@ A prototype tax-prep platform built for **Alcott & Reeves CPAs** — a from-scra
 
 This was built as a take-home product/design exercise. It's a real, clickable Next.js app — not a static mockup — but everything behind the UI is intentionally simulated (see "What's real vs. simulated" below).
 
+**Live prototype: https://meridian-gamma-lake.vercel.app**
+
 ## Running it
 
 ```bash
