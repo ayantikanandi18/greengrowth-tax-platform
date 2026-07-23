@@ -1,6 +1,6 @@
 # Meridian
 
-A prototype tax-prep platform built for **Alcott & Reeves CPAs** — a from-scratch client/CPA workflow product covering document intake, AI-assisted review, cross-role collaboration, and filing status, designed around one question: *what does someone actually need to do next?*
+A prototype tax-prep platform built for **GreenGrowth CPAs** — a from-scratch client/CPA workflow product covering document intake, AI-assisted review, cross-role collaboration, and filing status, designed around one question: *what does someone actually need to do next?*
 
 This was built as a take-home product/design exercise. It's a real, clickable Next.js app — not a static mockup — but everything behind the UI is intentionally simulated (see "What's real vs. simulated" below).
 
@@ -21,7 +21,7 @@ Click the account switcher in the top-right corner. There are 8 demo logins span
 
 | User | Role(s) | Why they exist |
 |---|---|---|
-| **Morgan Ellis** | Preparer *and* Client | The primary preparer account — also has their own personal return, to demonstrate a firm employee who is also a client (switch roles from the same account) |
+| **Ayantika Nandi** | Preparer *and* Client | The primary preparer account — also has their own personal return, to demonstrate a firm employee who is also a client (switch roles from the same account) |
 | **Jordan Osei** | Preparer (seasonal) | Same shell, visibly reduced permissions banner |
 | **Dana Whitfield** | Reviewer | Sees only returns in final review |
 | **Alex Whitcombe** | Firm Admin | Firm-wide overview |

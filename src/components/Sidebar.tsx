@@ -33,7 +33,7 @@ export default function Sidebar() {
         </span>
         <div>
           <div className="font-semibold text-sm leading-tight">Meridian</div>
-          <div className="text-[11px] text-ink-muted leading-tight">Alcott &amp; Reeves CPAs</div>
+          <div className="text-[11px] text-ink-muted leading-tight">GreenGrowth CPAs</div>
         </div>
       </div>
 

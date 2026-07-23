@@ -4,7 +4,7 @@ Not part of the submission itself — just a script to work from when recording.
 
 ## Suggested order
 
-1. **Land on the Preparer dashboard** (`/preparer`, logged in as Morgan Ellis).
+1. **Land on the Preparer dashboard** (`/preparer`, logged in as Ayantika Nandi).
    - "This is ranked by what actually needs attention, not a static report — blocked-on-someone returns surface first, then by due date." Point out the "My returns" vs "All firm returns" toggle.
 
 2. **Open Sarah Chen's return → Review & Traceability tab.**
@@ -23,7 +23,7 @@ Not part of the submission itself — just a script to work from when recording.
 6. **Switch role to Client → Priya Nair** (brand-new client, via the account switcher top-right).
    - "Zero documents, zero messages — she sees exactly one thing to do." Contrast briefly with Sarah Chen's client view (richer status, "action needed" banner only when something's actually blocking).
 
-7. **Switch to Morgan Ellis's own "Client (My Return)" role.**
+7. **Switch to Ayantika Nandi's own "Client (My Return)" role.**
    - "Same account, two roles — this is how a firm employee who also has a personal return in the system stays one identity, not two logins."
 
 8. **Reviewer and Admin, briefly** (10-15 seconds each).

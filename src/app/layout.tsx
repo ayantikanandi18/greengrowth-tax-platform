@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Meridian — Alcott & Reeves CPAs",
+  title: "Meridian — GreenGrowth CPAs",
   description: "A client & CPA tax platform prototype.",
 };
 

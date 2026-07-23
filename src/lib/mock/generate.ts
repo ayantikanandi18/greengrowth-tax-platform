@@ -30,8 +30,8 @@ const daysFromNow = (n: number) => new Date(NOW.getTime() + n * 86400000).toISOS
 export const USERS: User[] = [
   {
     id: "u-morgan",
-    name: "Morgan Ellis",
-    initials: "ME",
+    name: "Ayantika Nandi",
+    initials: "AN",
     roles: ["preparer", "client"],
     title: "Senior Tax Preparer",
     clientId: "c-morgan",
@@ -106,10 +106,10 @@ export const CLIENTS: Client[] = [
   },
   {
     id: "c-morgan",
-    name: "Morgan Ellis",
+    name: "Ayantika Nandi",
     type: "individual",
-    email: "morgan.ellis@alcottreeves.example",
-    assignedPreparerId: "u-jordan", // a colleague preparer handles Morgan's own return
+    email: "ayantika.nandi@greengrowthcpas.example",
+    assignedPreparerId: "u-jordan", // a colleague preparer handles Ayantika's own return
     createdAt: daysAgo(30),
   },
 ];
@@ -550,7 +550,7 @@ export const MESSAGES: Message[] = [
     subject: "Question about your dividend statement",
     visibility: "client",
     authorId: "u-morgan",
-    authorName: "Morgan Ellis",
+    authorName: "Ayantika Nandi",
     authorRole: "preparer",
     body: "Hi Sarah — I see a 1099-DIV from Cascade Brokerage. Can you confirm this account was open for all of 2025, or did you open it partway through the year?",
     createdAt: daysAgo(6),
@@ -588,7 +588,7 @@ export const MESSAGES: Message[] = [
     subject: "We're missing your W-2",
     visibility: "client",
     authorId: "u-morgan",
-    authorName: "Morgan Ellis",
+    authorName: "Ayantika Nandi",
     authorRole: "preparer",
     body: "Hi David — we can't move forward on your return until we receive your W-2. Could you upload it from your employer portal or take a photo of the paper copy?",
     createdAt: daysAgo(9),
@@ -601,7 +601,7 @@ export const MESSAGES: Message[] = [
     subject: "K-1 classification",
     visibility: "internal",
     authorId: "u-morgan",
-    authorName: "Morgan Ellis",
+    authorName: "Ayantika Nandi",
     authorRole: "preparer",
     body: "Dana — can you take a look at the Rivera Holdings K-1? Want a second opinion on passive vs. active before I finalize Schedule E.",
     createdAt: daysAgo(3),
