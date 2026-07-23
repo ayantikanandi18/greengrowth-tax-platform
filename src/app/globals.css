@@ -1,26 +1,72 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f5f6f8;
+  --surface: #ffffff;
+  --surface-sunken: #eef0f3;
+  --border: #dde1e7;
+  --border-strong: #c3c9d3;
+
+  --ink: #0f1a2b;
+  --ink-secondary: #4b5666;
+  --ink-muted: #8891a0;
+
+  --navy: #14233c;
+  --navy-strong: #0b1626;
+  --gold: #a3782f;
+  --gold-soft: #f1e6d0;
+
+  --good: #1a7f4b;
+  --good-soft: #e2f3ea;
+  --warning: #a3661a;
+  --warning-soft: #fbedd8;
+  --critical: #b42318;
+  --critical-soft: #fbe6e3;
+  --info: #1d4ed8;
+  --info-soft: #e4ebfd;
 }
 
 @theme inline {
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-ink: var(--ink);
+  --color-ink-secondary: var(--ink-secondary);
+  --color-ink-muted: var(--ink-muted);
+
+  --color-navy: var(--navy);
+  --color-navy-strong: var(--navy-strong);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+
+  --color-good: var(--good);
+  --color-good-soft: var(--good-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-critical: var(--critical);
+  --color-critical-soft: var(--critical-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--ink);
+  font-feature-settings: "cv11";
+}
+
+::selection {
+  background: color-mix(in srgb, var(--navy) 20%, transparent);
+}
+
+@layer components {
+  .card {
+    @apply bg-surface border border-border rounded-lg;
+  }
 }
