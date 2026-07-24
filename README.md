@@ -4,7 +4,7 @@ A prototype tax-prep platform built for **GreenGrowth CPAs** — a from-scratch 
 
 This was built as a take-home product/design exercise. It's a real, clickable Next.js app — not a static mockup — but everything behind the UI is intentionally simulated (see "What's real vs. simulated" below).
 
-**Live prototype: https://meridian-gamma-lake.vercel.app**
+**Live prototype: https://greengrowth-tax-platform-pi.vercel.app**
 
 ## Running it
 
