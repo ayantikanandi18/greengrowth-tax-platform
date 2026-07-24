@@ -117,5 +117,11 @@ export function roleLabel(role: Role) {
 export function clientDisplayName(clientId: string) {
   const c = getClient(clientId);
   if (!c) return "Unknown client";
-  return c.entityName ? `${c.entityName} (${c.name})` : c.name;
+  const base = c.entityName ? `${c.entityName} (${c.name})` : c.name;
+  // Challenge 05 — a firm employee's personal return uses their own name,
+  // identical to their staff identity. In any list that could show both
+  // (firm-wide admin view, a colleague's client list), make it unmistakable
+  // this row is their own file, not a duplicate staff entry.
+  const isStaffPersonalReturn = USERS.some((u) => u.clientId === clientId && u.roles.length > 1);
+  return isStaffPersonalReturn ? `${base} (personal return)` : base;
 }

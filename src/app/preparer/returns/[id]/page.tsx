@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   getDocumentsForReturn,
   getInsightsForReturn,
@@ -6,8 +5,9 @@ import {
   getReturn,
   getTasksForReturn,
 } from "@/lib/mock/data";
-import TaskList from "@/components/TaskList";
 import AIInsightCard from "@/components/AIInsightCard";
+import ReturnShortcuts from "./ReturnShortcuts";
+import ReturnTaskList from "./ReturnTaskList";
 import { notFound } from "next/navigation";
 
 export default async function ReturnOverview({ params }: { params: Promise<{ id: string }> }) {
@@ -29,26 +29,7 @@ export default async function ReturnOverview({ params }: { params: Promise<{ id:
           <p className="text-xs text-ink-muted mb-2">
             Deep-linked to their source — clicking one takes you straight there and back.
           </p>
-          <TaskList
-            tasks={openTasks}
-            returnHref={(task) => {
-              const from = `&fromLabel=${encodeURIComponent(task.title)}&fromHref=/preparer/returns/${id}`;
-              // Most-specific link wins: a task about one exact field goes
-              // straight to that field on the review screen, ahead of a
-              // more general document or message link.
-              if (task.linkedFieldId) {
-                return `/preparer/returns/${id}/review?field=${task.linkedFieldId}${from}`;
-              }
-              if (task.linkedDocumentId) {
-                return `/preparer/returns/${id}/documents?highlight=${task.linkedDocumentId}${from}`;
-              }
-              if (task.linkedMessageId) {
-                return `/preparer/returns/${id}/messages?${from.slice(1)}`;
-              }
-              return `/preparer/returns/${id}/review`;
-            }}
-            emptyLabel="No open tasks on this return."
-          />
+          <ReturnTaskList tasks={openTasks} returnId={id} />
         </section>
 
         {insights.length > 0 && (
@@ -63,20 +44,7 @@ export default async function ReturnOverview({ params }: { params: Promise<{ id:
         )}
       </div>
 
-      <div className="space-y-4">
-        <Link href={`/preparer/returns/${id}/documents`} className="card p-4 flex items-center justify-between hover:border-border-strong transition-colors">
-          <span className="text-sm font-medium">Documents</span>
-          <span className="text-sm text-ink-muted">{documents.length}</span>
-        </Link>
-        <Link href={`/preparer/returns/${id}/messages`} className="card p-4 flex items-center justify-between hover:border-border-strong transition-colors">
-          <span className="text-sm font-medium">Messages</span>
-          <span className="text-sm text-ink-muted">{messages.length}</span>
-        </Link>
-        <Link href={`/preparer/returns/${id}/review`} className="card p-4 flex items-center justify-between hover:border-border-strong transition-colors">
-          <span className="text-sm font-medium">Review & Traceability</span>
-          <span className="text-sm text-ink-muted">→</span>
-        </Link>
-      </div>
+      <ReturnShortcuts returnId={id} documentsCount={documents.length} messagesCount={messages.length} />
     </div>
   );
 }
