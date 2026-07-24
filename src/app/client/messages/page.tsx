@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRole } from "@/lib/context/RoleContext";
-import { getClient, getDocument, getMessagesForReturn, getReturnForClient } from "@/lib/mock/data";
+import { getClient, getDocument, getMessagesForReturn, getReturnForClient, getTask } from "@/lib/mock/data";
 import type { Message } from "@/lib/mock/types";
 import PageHeader from "@/components/PageHeader";
 
@@ -52,21 +52,27 @@ export default function ClientMessages() {
             {messages.map((m) => {
               const mine = m.authorId === currentUser.id;
               const linkedDoc = m.linkedDocumentId ? getDocument(m.linkedDocumentId) : null;
+              const linkedTask = m.linkedTaskId ? getTask(m.linkedTaskId) : null;
+              const chipClasses = `mt-2 inline-flex items-center gap-1 text-xs rounded-md px-2 py-1 ${
+                mine ? "bg-white/15" : "bg-surface border border-border"
+              }`;
               return (
                 <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
                   <div className={`max-w-[80%] rounded-xl px-4 py-2.5 text-sm ${mine ? "bg-navy text-white" : "bg-surface-sunken"}`}>
                     {!mine && <div className="text-xs font-medium mb-0.5 opacity-70">{m.authorName}</div>}
                     {m.body}
-                    {linkedDoc && (
-                      <Link
-                        href="/client/documents"
-                        className={`mt-2 inline-flex items-center gap-1 text-xs rounded-md px-2 py-1 ${
-                          mine ? "bg-white/15" : "bg-surface border border-border"
-                        }`}
-                      >
-                        📎 {linkedDoc.name}
-                      </Link>
-                    )}
+                    <div className="flex flex-wrap gap-2">
+                      {linkedDoc && (
+                        <Link href="/client/documents" className={chipClasses}>
+                          📎 {linkedDoc.name}
+                        </Link>
+                      )}
+                      {linkedTask && (
+                        <Link href="/client" className={chipClasses}>
+                          ✓ {linkedTask.title}
+                        </Link>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
