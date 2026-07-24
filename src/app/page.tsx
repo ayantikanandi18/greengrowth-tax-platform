@@ -19,5 +19,5 @@ export default function Home() {
     router.replace(HOME_BY_ROLE[activeRole] ?? "/preparer");
   }, [activeRole, router]);
 
-  return <div className="p-8 text-sm text-ink-muted">Loading Meridian…</div>;
+  return <div className="p-8 text-sm text-ink-muted">Loading GreenGrowth…</div>;
 }

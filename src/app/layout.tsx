@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Meridian — GreenGrowth CPAs",
+  title: "GreenGrowth — Client & Tax Portal",
   description: "A client & CPA tax platform prototype.",
 };
 

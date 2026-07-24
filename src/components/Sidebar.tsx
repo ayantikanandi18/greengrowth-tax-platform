@@ -29,11 +29,11 @@ export default function Sidebar() {
     <aside className="w-60 shrink-0 border-r border-border bg-surface flex flex-col">
       <div className="h-16 flex items-center gap-2 px-5 border-b border-border">
         <span className="h-8 w-8 rounded-md bg-navy flex items-center justify-center text-gold-soft font-serif font-semibold text-sm">
-          M
+          G
         </span>
         <div>
-          <div className="font-semibold text-sm leading-tight">Meridian</div>
-          <div className="text-[11px] text-ink-muted leading-tight">GreenGrowth CPAs</div>
+          <div className="font-semibold text-sm leading-tight">GreenGrowth</div>
+          <div className="text-[11px] text-ink-muted leading-tight">Client &amp; Tax Portal</div>
         </div>
       </div>
 

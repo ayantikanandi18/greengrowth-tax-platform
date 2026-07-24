@@ -1,6 +1,6 @@
-# Meridian
+# GreenGrowth
 
-A prototype tax-prep platform built for **GreenGrowth CPAs** — a from-scratch client/CPA workflow product covering document intake, AI-assisted review, cross-role collaboration, and filing status, designed around one question: *what does someone actually need to do next?*
+A prototype tax-prep platform for **GreenGrowth CPAs** — a from-scratch client/CPA workflow product covering document intake, AI-assisted review, cross-role collaboration, and filing status, designed around one question: *what does someone actually need to do next?*
 
 This was built as a take-home product/design exercise. It's a real, clickable Next.js app — not a static mockup — but everything behind the UI is intentionally simulated (see "What's real vs. simulated" below).
 
