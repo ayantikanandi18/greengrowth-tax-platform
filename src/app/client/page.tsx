@@ -106,7 +106,7 @@ export default function ClientHome() {
           </section>
         )}
 
-        {!needsQuestionnaire && !isBrandNew && (
+        {!needsQuestionnaire && (
           <div className="grid grid-cols-2 gap-4">
             <Link href="/client/documents" className="card p-5 hover:border-border-strong transition-colors">
               <div className="text-2xl font-semibold">{documents.length}</div>
