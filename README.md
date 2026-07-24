@@ -34,7 +34,7 @@ Click the account switcher in the top-right corner. There are 8 demo logins span
 
 *(Described in my own words — not reproducing the brief's proprietary language, since the source document was marked confidential.)*
 
-- **Traceability** — `/preparer/returns/r-sarah-2025/review`. Click any return field on the left; the right panel shows the exact source document, the region on it, and the transformation applied (e.g. wages is the sum of two W-2s — click through both).
+- **Traceability** — `/preparer/returns/r-sarah-2025/review`. Click any return field on the left; the right panel shows the exact source document, the region on it, and the transformation applied. Fields backed by more than one document (wages = 2 W-2s, the charitable deduction = 6 receipts) show a chip for **every** contributing source — click through each one rather than only ever seeing the first. AI-suggested and needs-input fields also surface their linked `AIInsightCard` right there (e.g. the AGI field explains exactly why it can't be finalized yet).
 - **Client/CPA collaboration** — `/preparer/returns/[id]/messages` and `/client/messages`. Internal-vs-client-visible toggle, messages linked back to specific documents, an "outstanding requests" panel.
 - **First-time onboarding** — log in as **Priya Nair**. Zero documents, zero messages → the home screen shows exactly one action, nothing else.
 - **Cross-object navigation** — from any return's Overview tab, click a task that references a document or message. You'll land there with a gold "← Back to [task]" banner and a deep-linkable URL (`?fromLabel=...&fromHref=...`) — your place is never lost.
