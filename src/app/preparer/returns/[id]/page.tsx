@@ -32,11 +32,18 @@ export default async function ReturnOverview({ params }: { params: Promise<{ id:
           <TaskList
             tasks={openTasks}
             returnHref={(task) => {
+              const from = `&fromLabel=${encodeURIComponent(task.title)}&fromHref=/preparer/returns/${id}`;
+              // Most-specific link wins: a task about one exact field goes
+              // straight to that field on the review screen, ahead of a
+              // more general document or message link.
+              if (task.linkedFieldId) {
+                return `/preparer/returns/${id}/review?field=${task.linkedFieldId}${from}`;
+              }
               if (task.linkedDocumentId) {
-                return `/preparer/returns/${id}/documents?highlight=${task.linkedDocumentId}&fromLabel=${encodeURIComponent(task.title)}&fromHref=/preparer/returns/${id}`;
+                return `/preparer/returns/${id}/documents?highlight=${task.linkedDocumentId}${from}`;
               }
               if (task.linkedMessageId) {
-                return `/preparer/returns/${id}/messages?fromLabel=${encodeURIComponent(task.title)}&fromHref=/preparer/returns/${id}`;
+                return `/preparer/returns/${id}/messages?${from.slice(1)}`;
               }
               return `/preparer/returns/${id}/review`;
             }}

@@ -473,6 +473,7 @@ export const TASKS: Task[] = [
     dueDate: daysFromNow(5),
     blocking: false,
     linkedDocumentId: "d-sarah-1099div",
+    linkedFieldId: "f-sarah-dividends",
   },
   {
     id: "t-sarah-agi",
@@ -484,6 +485,7 @@ export const TASKS: Task[] = [
     priority: "high",
     dueDate: daysFromNow(4),
     blocking: true,
+    linkedFieldId: "f-sarah-agi",
   },
   {
     id: "t-rivera-categorize",

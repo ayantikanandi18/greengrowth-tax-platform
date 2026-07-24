@@ -165,6 +165,7 @@ export interface Task {
   blocking: boolean;
   linkedDocumentId?: string;
   linkedMessageId?: string;
+  linkedFieldId?: string;
 }
 
 export interface QuestionnaireItem {
