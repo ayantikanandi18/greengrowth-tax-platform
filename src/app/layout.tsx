@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { RoleProvider } from "@/lib/context/RoleContext";
+import { QuestionnaireProvider } from "@/lib/context/QuestionnaireContext";
 import AppShell from "@/components/AppShell";
 
 const geistSans = Geist({
@@ -31,7 +32,9 @@ export default function RootLayout({
     >
       <body className="h-full">
         <RoleProvider>
-          <AppShell>{children}</AppShell>
+          <QuestionnaireProvider>
+            <AppShell>{children}</AppShell>
+          </QuestionnaireProvider>
         </RoleProvider>
       </body>
     </html>

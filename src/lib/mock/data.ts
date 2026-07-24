@@ -4,6 +4,7 @@ import {
   CLIENTS,
   MESSAGES,
   NOW,
+  QUESTIONNAIRE_ITEMS,
   RETURNS,
   SARAH_FIELDS,
   TASKS,
@@ -17,6 +18,7 @@ export {
   NOW,
   CLIENTS,
   MESSAGES,
+  QUESTIONNAIRE_ITEMS,
   RETURNS,
   SARAH_FIELDS,
   TASKS,
@@ -67,6 +69,10 @@ export function getDocument(documentId: string) {
 
 export function getTask(taskId: string) {
   return TASKS.find((t) => t.id === taskId) ?? null;
+}
+
+export function getQuestionnaireForClient(clientId: string) {
+  return QUESTIONNAIRE_ITEMS.filter((q) => q.clientId === clientId);
 }
 
 export function getReturnsForPreparer(preparerId: string) {

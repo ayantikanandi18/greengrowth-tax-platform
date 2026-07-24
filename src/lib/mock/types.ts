@@ -167,6 +167,14 @@ export interface Task {
   linkedMessageId?: string;
 }
 
+export interface QuestionnaireItem {
+  id: string;
+  clientId: string;
+  question: string;
+  helpText: string;
+  answer: string | null;
+}
+
 export interface Message {
   id: string;
   returnId: string;

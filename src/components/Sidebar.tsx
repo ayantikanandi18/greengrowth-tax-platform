@@ -3,15 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRole } from "@/lib/context/RoleContext";
-import { IconFile, IconHome, IconLayers, IconMessage, IconShield, IconUsers } from "./icons";
+import { useQuestionnaireProgress } from "@/lib/context/QuestionnaireContext";
+import { getQuestionnaireForClient } from "@/lib/mock/data";
+import { IconChecklist, IconFile, IconHome, IconLayers, IconMessage, IconShield, IconUsers } from "./icons";
 import type { Role } from "@/lib/mock/types";
 
-const NAV_BY_ROLE: Record<Role, { href: string; label: string; icon: React.ComponentType<React.SVGProps<SVGSVGElement>> }[]> = {
-  client: [
-    { href: "/client", label: "My Return", icon: IconHome },
-    { href: "/client/documents", label: "Documents", icon: IconFile },
-    { href: "/client/messages", label: "Messages", icon: IconMessage },
-  ],
+type NavItem = { href: string; label: string; icon: React.ComponentType<React.SVGProps<SVGSVGElement>> };
+
+const NAV_BY_ROLE: Record<Exclude<Role, "client">, NavItem[]> = {
   preparer: [
     { href: "/preparer", label: "Dashboard", icon: IconHome },
     { href: "/preparer/clients", label: "Clients", icon: IconUsers },
@@ -22,8 +21,28 @@ const NAV_BY_ROLE: Record<Role, { href: string; label: string; icon: React.Compo
 
 export default function Sidebar() {
   const { activeRole, currentUser } = useRole();
+  const { sessionAnswers } = useQuestionnaireProgress();
   const pathname = usePathname();
-  const items = NAV_BY_ROLE[activeRole];
+
+  let items: NavItem[];
+  if (activeRole === "client") {
+    // Challenge 03 — "what's hidden or deferred until it's relevant": the
+    // Questionnaire tab only exists in the nav while there's something left
+    // to answer, and disappears the moment the last question is saved.
+    const questionnaire = currentUser.clientId ? getQuestionnaireForClient(currentUser.clientId) : [];
+    const hasUnanswered = questionnaire.some((q) => !q.answer && !sessionAnswers[q.id]);
+
+    items = [
+      { href: "/client", label: "My Return", icon: IconHome },
+      ...(hasUnanswered
+        ? [{ href: "/client/questionnaire", label: "Questionnaire", icon: IconChecklist }]
+        : []),
+      { href: "/client/documents", label: "Documents", icon: IconFile },
+      { href: "/client/messages", label: "Messages", icon: IconMessage },
+    ];
+  } else {
+    items = NAV_BY_ROLE[activeRole];
+  }
 
   return (
     <aside className="w-60 shrink-0 border-r border-border bg-surface flex flex-col">

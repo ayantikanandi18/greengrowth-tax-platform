@@ -5,6 +5,7 @@ import type {
   DocumentCategory,
   ExtractedField,
   Message,
+  QuestionnaireItem,
   Task,
   TaxDocument,
   TaxReturn,
@@ -673,5 +674,57 @@ export const AI_INSIGHTS: AIInsight[] = [
     evidence: [{ documentId: "d-rivera-0", note: "Flagged during batch categorization" }],
     confidence: 0.71,
     status: "pending",
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Questionnaire items — the first thing a brand-new client completes, before
+// any documents are even requested. Priya (brand new) is all unanswered;
+// Sarah (established) has the same questions already answered, showing both
+// states the brief asks for.
+// ---------------------------------------------------------------------------
+
+export const QUESTIONNAIRE_ITEMS: QuestionnaireItem[] = [
+  {
+    id: "q-priya-filing-status",
+    clientId: "c-priya",
+    question: "What was your filing status for 2025?",
+    helpText: "Single, married filing jointly, married filing separately, or head of household.",
+    answer: null,
+  },
+  {
+    id: "q-priya-dependents",
+    clientId: "c-priya",
+    question: "Did you have any dependents in 2025?",
+    helpText: "Children or other qualifying relatives you supported financially.",
+    answer: null,
+  },
+  {
+    id: "q-priya-address",
+    clientId: "c-priya",
+    question: "Did you move during 2025?",
+    helpText: "We'll need your address history if you lived in more than one state.",
+    answer: null,
+  },
+  {
+    id: "q-sarah-filing-status",
+    clientId: "c-sarah",
+    question: "What was your filing status for 2025?",
+    helpText: "Single, married filing jointly, married filing separately, or head of household.",
+    answer: "Single",
+  },
+  {
+    id: "q-sarah-dependents",
+    clientId: "c-sarah",
+    question: "Did you have any dependents in 2025?",
+    helpText: "Children or other qualifying relatives you supported financially.",
+    answer: "No dependents.",
+  },
+  {
+    id: "q-sarah-address",
+    clientId: "c-sarah",
+    question: "Did you move during 2025?",
+    helpText: "We'll need your address history if you lived in more than one state.",
+    answer: "No, same address all year.",
   },
 ];
