@@ -10,8 +10,15 @@ export default function ReturnReview({ params }: { params: Promise<{ id: string 
   const { id } = use(params);
   const fields = getFieldsForReturn(id);
   const [selectedId, setSelectedId] = useState(fields[0]?.id ?? null);
+  const [sourceIndex, setSourceIndex] = useState(0);
   const selected = fields.find((f) => f.id === selectedId) ?? null;
   const insights = selected ? getInsightsForReturn(id).filter((i) => i.relatedFieldId === selected.id) : [];
+  const activeSource = selected?.sources[sourceIndex] ?? null;
+
+  function selectField(fieldId: string) {
+    setSelectedId(fieldId);
+    setSourceIndex(0);
+  }
 
   if (fields.length === 0) {
     return (
@@ -32,7 +39,7 @@ export default function ReturnReview({ params }: { params: Promise<{ id: string 
         {fields.map((field) => (
           <button
             key={field.id}
-            onClick={() => setSelectedId(field.id)}
+            onClick={() => selectField(field.id)}
             disabled={field.dataState === "locked"}
             className={`w-full text-left rounded-lg border-2 p-3.5 transition-colors ${dataStateContainerClasses(field.dataState)} ${
               selectedId === field.id ? "ring-2 ring-navy/30" : ""
@@ -54,11 +61,33 @@ export default function ReturnReview({ params }: { params: Promise<{ id: string 
               <div className="text-xs uppercase tracking-wide text-ink-muted mb-1">{selected.fieldLabel}</div>
               <div className="text-sm text-ink-secondary">{selected.transformation}</div>
             </div>
+
+            {selected.sources.length > 1 && (
+              <div className="flex gap-2 flex-wrap">
+                {selected.sources.map((source, i) => {
+                  const doc = getDocument(source.documentId);
+                  return (
+                    <button
+                      key={source.documentId}
+                      onClick={() => setSourceIndex(i)}
+                      className={`text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
+                        i === sourceIndex
+                          ? "bg-navy text-white border-navy"
+                          : "border-border hover:bg-surface-sunken"
+                      }`}
+                    >
+                      {i + 1} of {selected.sources.length}: {doc?.name ?? "Document"}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
             <div className="flex-1 min-h-[320px]">
               <DocumentViewer
-                document={selected.sourceDocumentId ? getDocument(selected.sourceDocumentId) : null}
-                page={selected.sourcePage}
-                regionLabel={selected.sourceRegionLabel}
+                document={activeSource ? getDocument(activeSource.documentId) : null}
+                page={activeSource?.page ?? null}
+                regionLabel={activeSource?.regionLabel ?? null}
               />
             </div>
             {insights.map((insight) => (

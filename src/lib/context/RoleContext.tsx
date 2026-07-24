@@ -16,8 +16,8 @@ const RoleContext = createContext<RoleContextValue | null>(null);
 
 const DEFAULT_USER_ID = "u-morgan";
 const DEFAULT_ROLE: Role = "preparer";
-const STORAGE_KEY_USER = "meridian:userId";
-const STORAGE_KEY_ROLE = "meridian:activeRole";
+const STORAGE_KEY_USER = "greengrowth:userId";
+const STORAGE_KEY_ROLE = "greengrowth:activeRole";
 
 // Read persisted UI state once, lazily, instead of an effect + setState —
 // this only touches `window` client-side (SSR gets the plain defaults).

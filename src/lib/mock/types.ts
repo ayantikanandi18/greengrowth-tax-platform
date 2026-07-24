@@ -135,14 +135,19 @@ export interface TaxDocument {
 
 export type FieldDataState = "ai-suggested" | "verified" | "locked" | "needs-input";
 
+export interface FieldSource {
+  documentId: string;
+  page: number;
+  regionLabel: string; // "Box 1"
+}
+
 export interface ExtractedField {
   id: string;
   returnId: string;
   fieldLabel: string; // "Form 1040, Line 1a — Wages"
   value: string;
-  sourceDocumentId: string | null;
-  sourcePage: number | null;
-  sourceRegionLabel: string | null; // "Box 1"
+  /** Every document that feeds this field — one for a direct copy, several for a sum. Empty when there's no source document at all (e.g. confirmed directly with the client). */
+  sources: FieldSource[];
   transformation: string | null; // "Sum of 2 W-2 Box 1 values"
   dataState: FieldDataState;
   confidence: number | null; // 0-1, only meaningful when ai-suggested
