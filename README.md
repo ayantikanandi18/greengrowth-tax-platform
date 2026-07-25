@@ -6,6 +6,15 @@ This was built as a take-home product/design exercise. It's a real, clickable Ne
 
 **Live prototype: https://greengrowth-tax-platform-pi.vercel.app**
 
+## At a glance
+
+- **One product, four roles** — Client, Preparer, Reviewer, Firm Admin — switchable from the same account (the account switcher, top right), each seeing a different shell built off the exact same data and components rather than four separate apps.
+- **5 demo clients, each at a different stage on purpose** — brand-new/onboarding, mid-review with AI-suggested values to check, a business return with 247 documents, a blocked/overdue return, and a firm employee who is *also* a client. See the table below.
+- **What it demonstrates**, one screen each: source-to-document traceability with a real document viewer; client↔CPA messaging with outstanding-request tracking; first-time onboarding that visibly changes once it's done; cross-object deep-linking that never loses your place; role-based permissions enforced consistently across every path into a return; a status/progress model that means the same thing to a client and a preparer; a dashboard ranked by real urgency logic, not a static list; one consistent visual language for what's clickable/editable/AI-generated/locked; search, filtering, and pagination tested against 247 real mock documents; and an AI review flow with a correction path that actually corrects something. Full breakdown, screen by screen, below.
+- **What's real:** all routing and UI logic, the prioritization/ranking algorithms, search/filter, the role-permission system, and the deep-linking trail.
+- **What's simulated:** the "AI" (hand-authored fake responses behind an artificial delay — no model call), authentication (a role switcher over a fixed list of demo users, not real login), and persistence (no backend, no database — everything resets on refresh).
+- **Why it looks the way it does:** this is my response to a confidential take-home case study for a CPA-firm tax platform — 10 open-ended design challenges, no prescribed UI. Every decision described below is my own interpretation, in my own words.
+
 ## Running it
 
 ```bash
