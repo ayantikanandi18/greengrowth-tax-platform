@@ -96,14 +96,36 @@ const URGENCY_ORDER: ReturnStatus[] = [
   "filed",
 ];
 
+/**
+ * A return's status can say "not blocking" while it's still sitting on a
+ * task that IS — e.g. an "In Review" return with a blocking, high-priority
+ * open task due in 4 days used to rank behind returns with nothing urgent
+ * at all, because only the return's own status fed the ranking. This pulls
+ * every open task's blocking flag and due date into the same signal.
+ */
+export function returnUrgency(taxReturn: (typeof RETURNS)[number]) {
+  const openTasks = TASKS.filter((t) => t.returnId === taxReturn.id && t.status === "open");
+  const hasBlockingTask = openTasks.some((t) => t.blocking);
+  const blocking = STATUS_META[taxReturn.status].blocking || hasBlockingTask;
+
+  const dueDates = [taxReturn.dueDate, ...openTasks.map((t) => t.dueDate)];
+  const nextDueDate = dueDates.reduce((earliest, d) => (new Date(d) < new Date(earliest) ? d : earliest));
+  const isTaskDriven = nextDueDate !== taxReturn.dueDate;
+
+  const blockingTask = openTasks.find((t) => t.blocking);
+  const ownerRole = STATUS_META[taxReturn.status].blocking ? STATUS_META[taxReturn.status].ownerRole : (blockingTask?.ownerRole ?? STATUS_META[taxReturn.status].ownerRole);
+
+  return { blocking, nextDueDate, isTaskDriven, openTaskCount: openTasks.length, ownerRole };
+}
+
 export function rankReturnsByUrgency(returns: (typeof RETURNS)[number][]) {
   return [...returns].sort((a, b) => {
-    const aBlocking = STATUS_META[a.status].blocking;
-    const bBlocking = STATUS_META[b.status].blocking;
-    if (aBlocking !== bBlocking) return aBlocking ? -1 : 1;
+    const ua = returnUrgency(a);
+    const ub = returnUrgency(b);
+    if (ua.blocking !== ub.blocking) return ua.blocking ? -1 : 1;
 
-    const aDue = new Date(a.dueDate).getTime();
-    const bDue = new Date(b.dueDate).getTime();
+    const aDue = new Date(ua.nextDueDate).getTime();
+    const bDue = new Date(ub.nextDueDate).getTime();
     if (aDue !== bDue) return aDue - bDue;
 
     return URGENCY_ORDER.indexOf(a.status) - URGENCY_ORDER.indexOf(b.status);
