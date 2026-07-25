@@ -5,7 +5,7 @@ import {
   getReturn,
   getTasksForReturn,
 } from "@/lib/mock/data";
-import AIInsightCard from "@/components/AIInsightCard";
+import ReturnInsights from "./ReturnInsights";
 import ReturnShortcuts from "./ReturnShortcuts";
 import ReturnTaskList from "./ReturnTaskList";
 import { notFound } from "next/navigation";
@@ -32,16 +32,7 @@ export default async function ReturnOverview({ params }: { params: Promise<{ id:
           <ReturnTaskList tasks={openTasks} returnId={id} />
         </section>
 
-        {insights.length > 0 && (
-          <section>
-            <h2 className="text-sm font-semibold mb-2">AI insights needing a look</h2>
-            <div className="space-y-3">
-              {insights.map((insight) => (
-                <AIInsightCard key={insight.id} insight={insight} />
-              ))}
-            </div>
-          </section>
-        )}
+        <ReturnInsights insights={insights} />
       </div>
 
       <ReturnShortcuts returnId={id} documentsCount={documents.length} messagesCount={messages.length} />
