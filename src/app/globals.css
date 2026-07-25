@@ -1,23 +1,28 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f5f6f8;
+  /* Variable names (--navy, --gold) are historical — the palette itself
+     is medium green + white, per the firm's brand. Renaming every
+     bg-navy/text-navy/border-navy class across the app wasn't worth the
+     risk of touching dozens of already-verified files for a values-only
+     change. */
+  --background: #f6f9f7;
   --surface: #ffffff;
-  --surface-sunken: #eef0f3;
-  --border: #dde1e7;
-  --border-strong: #c3c9d3;
+  --surface-sunken: #edf3ef;
+  --border: #dbe6df;
+  --border-strong: #bcd0c3;
 
-  --ink: #0f1a2b;
-  --ink-secondary: #4b5666;
-  --ink-muted: #8891a0;
+  --ink: #101f18;
+  --ink-secondary: #445048;
+  --ink-muted: #7c8880;
 
-  --navy: #14233c;
-  --navy-strong: #0b1626;
+  --navy: #1d6b45;
+  --navy-strong: #123d26;
   --gold: #a3782f;
   --gold-soft: #f1e6d0;
 
-  --good: #1a7f4b;
-  --good-soft: #e2f3ea;
+  --good: #2f9e5b;
+  --good-soft: #e3f5ea;
   --warning: #a3661a;
   --warning-soft: #fbedd8;
   --critical: #b42318;
@@ -68,5 +73,12 @@ body {
 @layer components {
   .card {
     @apply bg-surface border border-border rounded-lg;
+    box-shadow: 0 1px 2px rgba(16, 31, 24, 0.04);
+    transition: box-shadow 150ms ease, border-color 150ms ease;
+  }
+
+  a.card:hover,
+  button.card:hover {
+    box-shadow: 0 4px 16px rgba(16, 31, 24, 0.08);
   }
 }
