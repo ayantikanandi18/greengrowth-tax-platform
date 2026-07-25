@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useRole } from "@/lib/context/RoleContext";
-import { clientDisplayName, getReturnsForReviewer, getTasksForReturn } from "@/lib/mock/data";
+import { clientDisplayName, getFieldsForReturn, getReturnsForReviewer, getTasksForReturn, type FieldDataState } from "@/lib/mock/data";
+import DataStateBadge from "@/components/DataStateBadge";
 import PageHeader from "@/components/PageHeader";
 import StatusPill from "@/components/StatusPill";
 
@@ -17,6 +18,14 @@ export default function ReviewerQueue() {
         <div className="card divide-y divide-border">
           {returns.map((r) => {
             const reviewerTasks = getTasksForReturn(r.id).filter((t) => t.ownerRole === "reviewer" && t.status === "open");
+            // Same Clickable-vs-Editable badge language a preparer sees on
+            // the return itself — a reviewer deciding what to open next
+            // shouldn't have to click in just to find out how much is
+            // still AI-suggested vs. already verified.
+            const stateCounts = getFieldsForReturn(r.id).reduce(
+              (acc, f) => ({ ...acc, [f.dataState]: (acc[f.dataState] ?? 0) + 1 }),
+              {} as Partial<Record<FieldDataState, number>>,
+            );
             return (
               <Link
                 key={r.id}
@@ -29,6 +38,16 @@ export default function ReviewerQueue() {
                     {r.taxYear} {r.formType}
                     {reviewerTasks.length > 0 && ` · ${reviewerTasks.length} item(s) need your input`}
                   </div>
+                  {Object.keys(stateCounts).length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {(Object.keys(stateCounts) as FieldDataState[]).map((state) => (
+                        <div key={state} className="flex items-center gap-1">
+                          <DataStateBadge state={state} />
+                          <span className="text-xs text-ink-muted">×{stateCounts[state]}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <StatusPill status={r.status} audience="staff" />
               </Link>

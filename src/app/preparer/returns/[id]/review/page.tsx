@@ -25,12 +25,22 @@ export default function ReturnReview({ params }: { params: Promise<{ id: string 
   // AI insight below should visibly flip its badge to Verified — otherwise
   // "what requires approval" and "what has been verified" never connect.
   const [fieldOverrides, setFieldOverrides] = useState<Record<string, FieldDataState>>({});
+  // "needs-input" fields are the one state where a value is actually
+  // editable, not just clickable-to-inspect — this is where a typed
+  // correction lives, keyed separately from the read-only field.value.
+  const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
   const selected = fields.find((f) => f.id === selectedId) ?? null;
   const insights = selected ? getInsightsForReturn(id).filter((i) => i.relatedFieldId === selected.id) : [];
   const activeSource = selected?.sources[sourceIndex] ?? null;
 
   function stateFor(fieldId: string, fallback: FieldDataState) {
     return fieldOverrides[fieldId] ?? fallback;
+  }
+
+  function confirmValue(fieldId: string, value: string) {
+    if (!value.trim()) return;
+    setFieldValues((prev) => ({ ...prev, [fieldId]: value.trim() }));
+    setFieldOverrides((prev) => ({ ...prev, [fieldId]: "verified" }));
   }
 
   function selectField(fieldId: string) {
@@ -70,7 +80,7 @@ export default function ReturnReview({ params }: { params: Promise<{ id: string 
                   <span className="text-xs text-ink-muted">{field.fieldLabel}</span>
                   <DataStateBadge state={state} />
                 </div>
-                <div className="text-lg font-semibold">{field.value}</div>
+                <div className="text-lg font-semibold">{fieldValues[field.id] ?? field.value}</div>
               </button>
             );
           })}
@@ -81,7 +91,34 @@ export default function ReturnReview({ params }: { params: Promise<{ id: string 
             <>
               <div>
                 <div className="text-xs uppercase tracking-wide text-ink-muted mb-1">{selected.fieldLabel}</div>
-                <div className="text-sm text-ink-secondary">{selected.transformation}</div>
+                {stateFor(selected.id, selected.dataState) === "needs-input" ? (
+                  <form
+                    key={selected.id}
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const value = String(new FormData(e.currentTarget).get("value") ?? "");
+                      confirmValue(selected.id, value);
+                    }}
+                    className="space-y-2"
+                  >
+                    <p className="text-sm text-ink-secondary">{selected.transformation}</p>
+                    <div className="flex gap-2">
+                      <input
+                        name="value"
+                        defaultValue={fieldValues[selected.id] ?? selected.value}
+                        className="flex-1 text-sm border border-warning/50 rounded-md px-2.5 py-1.5 bg-surface focus:outline-none focus:ring-2 focus:ring-navy/30"
+                      />
+                      <button
+                        type="submit"
+                        className="text-xs font-medium px-3 py-1.5 rounded-md bg-navy text-white hover:bg-navy-strong transition-colors shrink-0"
+                      >
+                        Confirm value
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="text-sm text-ink-secondary">{selected.transformation}</div>
+                )}
               </div>
 
               {selected.sources.length > 1 && (
