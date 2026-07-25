@@ -267,34 +267,30 @@ export const SARAH_DOCUMENTS: TaxDocument[] = [
 // Documents — Rivera Consulting (large volume, for the scale/navigability challenge)
 // ---------------------------------------------------------------------------
 
-const EXPENSE_VENDORS_KINDS: [string, string][] = [
-  ["Office Supplies", "Staples"],
-  ["Software", "Adobe"],
-  ["Software", "Google Workspace"],
-  ["Travel", "Delta Airlines"],
-  ["Travel", "Marriott"],
-  ["Meals", "Local Bistro"],
-  ["Utilities", "Pacific Power & Light"],
-  ["Contractor Payment", "Freelance Designer"],
-  ["Equipment", "Best Buy Business"],
-  ["Insurance", "Hartford Business Insurance"],
+// Category is keyed to the kind itself, not drawn independently — a
+// utility bill is always a utility bill, never randomly "Income," and two
+// receipts of the same kind can't land in different categories from each
+// other by chance. Equipment maps to Deductions deliberately: it's the
+// kind of expense tied to Section 179 depreciation, which is exactly what
+// f-rivera-depreciation (evidenced by d-rivera-5, an Equipment receipt)
+// is about.
+const EXPENSE_VENDORS_KINDS: [string, string, DocumentCategory][] = [
+  ["Office Supplies", "Staples", "Business Expenses"],
+  ["Software", "Adobe", "Business Expenses"],
+  ["Software", "Google Workspace", "Business Expenses"],
+  ["Travel", "Delta Airlines", "Business Expenses"],
+  ["Travel", "Marriott", "Business Expenses"],
+  ["Meals", "Local Bistro", "Business Expenses"],
+  ["Utilities", "Pacific Power & Light", "Business Expenses"],
+  ["Contractor Payment", "Freelance Designer", "Business Expenses"],
+  ["Equipment", "Best Buy Business", "Deductions"],
+  ["Insurance", "Hartford Business Insurance", "Deductions"],
 ];
 
 function buildRiveraDocuments(): TaxDocument[] {
   const docs: TaxDocument[] = [];
   for (let i = 0; i < 244; i++) {
-    const [kind, vendor] = faker.helpers.arrayElement(EXPENSE_VENDORS_KINDS);
-    // Every entry in EXPENSE_VENDORS_KINDS is, by construction, a business
-    // expense — the category picked here used to be a fully independent
-    // random draw that included "Income" and "Correspondence," so a
-    // utility bill from Pacific Power & Light could land in "Income"
-    // purely by chance, with docType following it into "Invoice." Expense
-    // receipts can only ever land in a category that's actually about an
-    // expense.
-    const category = faker.helpers.weightedArrayElement([
-      { value: "Business Expenses", weight: 8 },
-      { value: "Deductions", weight: 2 },
-    ]) as DocumentCategory;
+    const [kind, vendor, category] = faker.helpers.arrayElement(EXPENSE_VENDORS_KINDS);
     docs.push({
       id: `d-rivera-${i}`,
       returnId: "r-rivera-2025",
@@ -347,6 +343,34 @@ function buildRiveraDocuments(): TaxDocument[] {
       vendor: "Rivera Holdings Partnership",
       amount: 14200,
       tags: ["k-1", "partnership"],
+    },
+    // "Correspondence" existed as a category with zero real documents
+    // anywhere in the dataset — these are actual correspondence, not
+    // financial source documents (no dollar amount extracted from them),
+    // which is the real distinction between this category and the rest.
+    {
+      id: "d-rivera-engagement-letter",
+      returnId: "r-rivera-2025",
+      name: "Engagement Letter — 2025 Tax Preparation Services",
+      docType: "Engagement Letter",
+      category: "Correspondence",
+      uploadedAt: daysAgo(205),
+      uploadedBy: "preparer",
+      pageCount: 3,
+      vendor: "GreenGrowth CPAs",
+      tags: ["engagement-letter"],
+    },
+    {
+      id: "d-rivera-irs-notice",
+      returnId: "r-rivera-2025",
+      name: "IRS Notice CP2000 — Underreported Income Inquiry",
+      docType: "IRS Notice",
+      category: "Correspondence",
+      uploadedAt: daysAgo(45),
+      uploadedBy: "client",
+      pageCount: 4,
+      vendor: "Internal Revenue Service",
+      tags: ["irs-notice"],
     },
   );
   return docs;
