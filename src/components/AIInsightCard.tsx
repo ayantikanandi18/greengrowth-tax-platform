@@ -11,7 +11,19 @@ const TYPE_STYLES: Record<AIInsight["type"], { badge: string; label: string }> =
   correction: { badge: "bg-critical-soft text-critical", label: "Possible correction" },
 };
 
-export default function AIInsightCard({ insight, field }: { insight: AIInsight; field?: ExtractedField }) {
+export default function AIInsightCard({
+  insight,
+  field,
+  onResolved,
+}: {
+  insight: AIInsight;
+  field?: ExtractedField;
+  /** Fires once, the moment "pending" resolves either direction — lets a
+   * host page flip the field's own badge to Verified so approving an
+   * AI suggestion visibly closes the loop instead of only updating this
+   * card's own buttons. */
+  onResolved?: () => void;
+}) {
   const [expanded, setExpanded] = useState(false);
   const [status, setStatus] = useState(insight.status);
   const [checking, setChecking] = useState(false);
@@ -19,9 +31,15 @@ export default function AIInsightCard({ insight, field }: { insight: AIInsight; 
 
   const style = TYPE_STYLES[insight.type];
 
+  function handleAccept() {
+    setStatus("accepted");
+    onResolved?.();
+  }
+
   async function handleRecheck() {
     if (!field) {
       setStatus("corrected");
+      onResolved?.();
       return;
     }
     setChecking(true);
@@ -29,6 +47,7 @@ export default function AIInsightCard({ insight, field }: { insight: AIInsight; 
     setChecking(false);
     setRecheckNote(result.explanation);
     setStatus("corrected");
+    onResolved?.();
   }
 
   return (
@@ -87,7 +106,7 @@ export default function AIInsightCard({ insight, field }: { insight: AIInsight; 
         {status === "pending" ? (
           <>
             <button
-              onClick={() => setStatus("accepted")}
+              onClick={handleAccept}
               className="text-xs font-medium px-3 py-1.5 rounded-md bg-navy text-white hover:bg-navy-strong transition-colors"
             >
               Looks right

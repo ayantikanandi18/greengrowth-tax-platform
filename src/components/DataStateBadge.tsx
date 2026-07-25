@@ -41,7 +41,11 @@ export function dataStateContainerClasses(state: FieldDataState) {
     case "verified":
       return "border-solid border-border hover:border-good/50 cursor-pointer";
     case "locked":
-      return "border-solid border-border bg-surface-sunken/60 cursor-not-allowed";
+      // Still clickable — locked means "can't be changed," not "can't be
+      // inspected." Clicking shows why, same as every other field; the
+      // muted fill + lock icon (no dashed/colored outline) is what signals
+      // "look, don't touch," not a disabled control.
+      return "border-solid border-border bg-surface-sunken/60 cursor-pointer";
     case "needs-input":
       return "border-solid border-warning/50 cursor-pointer";
   }

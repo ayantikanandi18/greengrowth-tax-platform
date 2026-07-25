@@ -1,5 +1,6 @@
 import {
   getDocumentsForReturn,
+  getFieldsForReturn,
   getInsightsForReturn,
   getMessagesForReturn,
   getReturn,
@@ -21,6 +22,7 @@ export default async function ReturnOverview({ params }: { params: Promise<{ id:
   const openTasks = rankTasksByUrgency(tasks.filter((t) => t.status === "open"));
   const documents = getDocumentsForReturn(id);
   const messages = getMessagesForReturn(id);
+  const fields = getFieldsForReturn(id);
   const insights = getInsightsForReturn(id).filter((i) => i.status === "pending").slice(0, 2);
 
   return (
@@ -40,7 +42,7 @@ export default async function ReturnOverview({ params }: { params: Promise<{ id:
           <ReturnInsights insights={insights} />
         </div>
 
-        <ReturnShortcuts returnId={id} documentsCount={documents.length} messagesCount={messages.length} />
+        <ReturnShortcuts returnId={id} documentsCount={documents.length} messagesCount={messages.length} fields={fields} />
       </div>
     </div>
   );
