@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { USERS } from "@/lib/mock/data";
 import type { Role, User } from "@/lib/mock/types";
 
@@ -19,6 +20,15 @@ const DEFAULT_ROLE: Role = "preparer";
 const STORAGE_KEY_USER = "greengrowth:userId";
 const STORAGE_KEY_ROLE = "greengrowth:activeRole";
 
+/** Shared with the root "/" redirect page — one source of truth for
+ * "where does this role actually live." */
+export const HOME_BY_ROLE: Record<Role, string> = {
+  client: "/client",
+  preparer: "/preparer",
+  reviewer: "/reviewer",
+  admin: "/admin",
+};
+
 // Read persisted UI state once, lazily, instead of an effect + setState —
 // this only touches `window` client-side (SSR gets the plain defaults).
 function initialUserId() {
@@ -33,6 +43,7 @@ function initialRole(): Role {
 }
 
 export function RoleProvider({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const [currentUserId, setCurrentUserIdState] = useState(initialUserId);
   const [activeRole, setActiveRoleState] = useState<Role>(initialRole);
 
@@ -41,21 +52,30 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
     [currentUserId],
   );
 
+  // Switching the demo user or the active role only ever updated context
+  // state — nothing navigated. If you were three levels deep on a
+  // preparer-only route (e.g. a specific return) and switched to Client,
+  // the sidebar would re-render with client nav links while the main
+  // content stayed on that same preparer route, since the URL never
+  // changed. Both setters now land you on the new role's home route, the
+  // same way the very first page load does.
   function setCurrentUserId(id: string) {
     const user = USERS.find((u) => u.id === id);
     if (!user) return;
     setCurrentUserIdState(id);
     window.localStorage.setItem(STORAGE_KEY_USER, id);
-    if (!user.roles.includes(activeRole)) {
-      const nextRole = user.roles[0];
+    const nextRole = user.roles.includes(activeRole) ? activeRole : user.roles[0];
+    if (nextRole !== activeRole) {
       setActiveRoleState(nextRole);
       window.localStorage.setItem(STORAGE_KEY_ROLE, nextRole);
     }
+    router.push(HOME_BY_ROLE[nextRole]);
   }
 
   function setActiveRole(role: Role) {
     setActiveRoleState(role);
     window.localStorage.setItem(STORAGE_KEY_ROLE, role);
+    router.push(HOME_BY_ROLE[role]);
   }
 
   return (
