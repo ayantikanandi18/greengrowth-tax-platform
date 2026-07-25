@@ -3,8 +3,9 @@
 import { use, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { getDocumentsForReturn } from "@/lib/mock/data";
-import type { DocumentCategory } from "@/lib/mock/types";
+import type { DocumentCategory, TaxDocument } from "@/lib/mock/types";
 import BackToBanner from "@/components/BackToBanner";
+import DocumentViewer from "@/components/DocumentViewer";
 import { IconFile, IconSearch } from "@/components/icons";
 
 const CATEGORIES: (DocumentCategory | "All")[] = [
@@ -17,31 +18,53 @@ const CATEGORIES: (DocumentCategory | "All")[] = [
 
 const PAGE_SIZE = 40;
 
+function sortByRecency(docs: TaxDocument[]) {
+  return [...docs].sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
+}
+
 export default function ReturnDocuments({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const searchParams = useSearchParams();
   const highlightId = searchParams.get("highlight");
 
   const allDocs = useMemo(() => getDocumentsForReturn(id), [id]);
+  const highlightedDoc = useMemo(
+    () => (highlightId ? (allDocs.find((d) => d.id === highlightId) ?? null) : null),
+    [allDocs, highlightId],
+  );
+
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState<(typeof CATEGORIES)[number]>("All");
-  const [visible, setVisible] = useState(PAGE_SIZE);
-  const [summaryView, setSummaryView] = useState(allDocs.length > 30);
+  // A deep link into a specific document is pointless if the page then
+  // hides it behind the aggregate summary view or a pagination window it
+  // doesn't happen to fall inside — both defaults get overridden whenever
+  // there's an actual document to land on.
+  const [category, setCategory] = useState<(typeof CATEGORIES)[number]>(() => highlightedDoc?.category ?? "All");
+  const [summaryView, setSummaryView] = useState(() => (highlightedDoc ? false : allDocs.length > 30));
+  const [selectedDocId, setSelectedDocId] = useState<string | null>(() => highlightedDoc?.id ?? null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return allDocs.filter((d) => {
+    const matches = allDocs.filter((d) => {
       if (category !== "All" && d.category !== category) return false;
       if (!q) return true;
       return d.name.toLowerCase().includes(q) || d.vendor?.toLowerCase().includes(q) || d.docType.toLowerCase().includes(q);
     });
+    return sortByRecency(matches);
   }, [allDocs, query, category]);
+
+  const [visible, setVisible] = useState(() => {
+    if (!highlightedDoc) return PAGE_SIZE;
+    const idx = filtered.findIndex((d) => d.id === highlightedDoc.id);
+    return idx >= 0 ? Math.max(PAGE_SIZE, idx + 1) : PAGE_SIZE;
+  });
 
   const byCategory = useMemo(() => {
     const map = new Map<string, number>();
     for (const d of allDocs) map.set(d.category, (map.get(d.category) ?? 0) + 1);
     return map;
   }, [allDocs]);
+
+  const selectedDoc = selectedDocId ? (allDocs.find((d) => d.id === selectedDocId) ?? null) : null;
 
   return (
     <div>
@@ -120,37 +143,74 @@ export default function ReturnDocuments({ params }: { params: Promise<{ id: stri
             })}
           </div>
         ) : (
-          <div className="card divide-y divide-border">
-            {filtered.slice(0, visible).map((doc) => (
-              <div
-                key={doc.id}
-                className={`flex items-center gap-3 px-4 py-2.5 ${
-                  doc.id === highlightId ? "bg-gold-soft" : ""
-                }`}
-              >
-                <IconFile className="h-4 w-4 text-ink-secondary shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm truncate">{doc.name}</div>
+          <div className={`grid gap-6 ${selectedDoc ? "grid-cols-3" : "grid-cols-1"}`}>
+            <div className={selectedDoc ? "col-span-2" : ""}>
+              <div className="card divide-y divide-border">
+                <div className="px-4 py-2 text-[11px] uppercase tracking-wide text-ink-muted">
+                  Newest first — click a document to view it
                 </div>
-                <span className="text-xs text-ink-muted shrink-0">{doc.category}</span>
-                {doc.amount !== undefined && (
-                  <span className="text-xs font-medium w-20 text-right shrink-0">${doc.amount.toLocaleString()}</span>
+                {filtered.slice(0, visible).map((doc) => (
+                  <button
+                    key={doc.id}
+                    onClick={() => setSelectedDocId(doc.id)}
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-surface-sunken ${
+                      doc.id === highlightId ? "bg-gold-soft" : ""
+                    } ${selectedDocId === doc.id ? "ring-2 ring-inset ring-navy/30" : ""}`}
+                  >
+                    <IconFile className="h-4 w-4 text-ink-secondary shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm truncate">{doc.name}</div>
+                    </div>
+                    <span className="text-xs text-ink-muted shrink-0">{doc.category}</span>
+                    {doc.amount !== undefined && (
+                      <span className="text-xs font-medium w-20 text-right shrink-0">${doc.amount.toLocaleString()}</span>
+                    )}
+                    <span className="text-xs text-ink-muted w-24 text-right shrink-0">
+                      {new Date(doc.uploadedAt).toLocaleDateString()}
+                    </span>
+                  </button>
+                ))}
+                {filtered.length === 0 && (
+                  <div className="px-4 py-10 text-center text-sm text-ink-muted">No documents match.</div>
                 )}
-                <span className="text-xs text-ink-muted w-24 text-right shrink-0">
-                  {new Date(doc.uploadedAt).toLocaleDateString()}
-                </span>
+                {filtered.length > visible && (
+                  <button
+                    onClick={() => setVisible((v) => v + PAGE_SIZE)}
+                    className="w-full py-3 text-sm text-navy hover:bg-surface-sunken transition-colors"
+                  >
+                    Show {Math.min(PAGE_SIZE, filtered.length - visible)} more (of {filtered.length} matching)
+                  </button>
+                )}
               </div>
-            ))}
-            {filtered.length === 0 && (
-              <div className="px-4 py-10 text-center text-sm text-ink-muted">No documents match.</div>
-            )}
-            {filtered.length > visible && (
-              <button
-                onClick={() => setVisible((v) => v + PAGE_SIZE)}
-                className="w-full py-3 text-sm text-navy hover:bg-surface-sunken transition-colors"
-              >
-                Show {Math.min(PAGE_SIZE, filtered.length - visible)} more (of {filtered.length} matching)
-              </button>
+            </div>
+
+            {selectedDoc && (
+              <div className="space-y-3">
+                <div className="card p-4">
+                  <div className="text-sm font-medium">{selectedDoc.name}</div>
+                  <dl className="mt-2 space-y-1 text-xs text-ink-muted">
+                    <div className="flex justify-between">
+                      <dt>Category</dt>
+                      <dd className="text-ink-secondary">{selectedDoc.category}</dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt>Uploaded</dt>
+                      <dd className="text-ink-secondary">
+                        {new Date(selectedDoc.uploadedAt).toLocaleDateString()} · by {selectedDoc.uploadedBy}
+                      </dd>
+                    </div>
+                    {selectedDoc.amount !== undefined && (
+                      <div className="flex justify-between">
+                        <dt>Amount</dt>
+                        <dd className="text-ink-secondary">${selectedDoc.amount.toLocaleString()}</dd>
+                      </div>
+                    )}
+                  </dl>
+                </div>
+                <div className="h-[420px]">
+                  <DocumentViewer document={selectedDoc} page={1} regionLabel={null} />
+                </div>
+              </div>
             )}
           </div>
         )}
