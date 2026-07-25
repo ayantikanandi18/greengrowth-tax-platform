@@ -27,12 +27,22 @@ export default function StatusProgress({
   const meta = STATUS_META[status];
   const label = audience === "client" ? meta.clientLabel : meta.staffLabel;
   const dot = DOT_CLASSES[meta.color];
+  // "filed" is the one status where nothing owns a next action — the
+  // journey is actually finished, not just "currently at the last step."
+  // Without this, the final milestone would sit in a highlighted "current"
+  // ring forever, which reads as still-in-progress on a done return.
+  const isComplete = meta.ownerRole === "none";
 
   return (
     <div className="card p-5">
       <div className="flex items-center gap-2 mb-4">
         {MILESTONES.map((name, i) => {
-          const state = i < meta.milestone ? "done" : i === meta.milestone ? "current" : "upcoming";
+          const state =
+            i < meta.milestone || (isComplete && i === meta.milestone)
+              ? "done"
+              : i === meta.milestone
+                ? "current"
+                : "upcoming";
           return (
             <div key={name} className="flex-1 flex items-center gap-2">
               <div className="flex-1 flex flex-col items-center gap-1.5">
@@ -73,7 +83,7 @@ export default function StatusProgress({
             )}
           </div>
           <p className="text-sm text-ink-secondary mt-1">{meta.description}</p>
-          <p className="text-xs text-ink-muted mt-1">Next: {meta.whatsNext}</p>
+          {!isComplete && <p className="text-xs text-ink-muted mt-1">Next: {meta.whatsNext}</p>}
         </div>
         <div className="text-right shrink-0">
           <div className="text-[11px] text-ink-muted uppercase tracking-wide">Owner</div>
