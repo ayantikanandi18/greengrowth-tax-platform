@@ -33,24 +33,48 @@ export default function DocumentViewer({
       </div>
 
       <div className="flex-1 p-6 flex items-center justify-center">
-        <div className="w-full max-w-sm aspect-[8.5/11] bg-surface border border-border-strong rounded-md shadow-sm relative p-5">
-          <div className="space-y-2">
-            <div className="h-2.5 w-2/3 bg-surface-sunken rounded" />
-            <div className="h-2 w-1/2 bg-surface-sunken rounded" />
-            <div className="h-2 w-5/6 bg-surface-sunken rounded mt-4" />
-            <div className="h-2 w-4/6 bg-surface-sunken rounded" />
+        <div className="w-full max-w-sm aspect-[8.5/11] bg-surface border border-border-strong rounded-md shadow-sm relative p-6 flex flex-col">
+          {/* Real fields from the document record, not decorative skeleton
+              bars — a mockup that says nothing is a mockup that reads as
+              broken, not intentional. */}
+          <div className="text-sm font-semibold text-ink">{document.vendor ?? document.docType}</div>
+          <div className="text-[11px] text-ink-muted mt-0.5">
+            {document.docType} · {new Date(document.uploadedAt).toLocaleDateString()}
           </div>
 
+          <div className="mt-5 space-y-1.5 text-[11px] text-ink-secondary">
+            <div className="flex justify-between border-b border-border pb-1">
+              <span className="text-ink-muted">Document ID</span>
+              <span>{document.id.toUpperCase()}</span>
+            </div>
+            <div className="flex justify-between border-b border-border pb-1">
+              <span className="text-ink-muted">Category</span>
+              <span>{document.category}</span>
+            </div>
+            {document.amount !== undefined && (
+              <div className="flex justify-between border-b border-border pb-1">
+                <span className="text-ink-muted">Amount</span>
+                <span className="font-medium">${document.amount.toLocaleString()}</span>
+              </div>
+            )}
+            <div className="flex justify-between border-b border-border pb-1">
+              <span className="text-ink-muted">Uploaded by</span>
+              <span className="capitalize">{document.uploadedBy}</span>
+            </div>
+          </div>
+
+          {/* Sits in normal flow, not absolutely positioned — an overlay
+              calibrated for the old, mostly-empty mockup started colliding
+              with these real data rows the moment the content grew. */}
           {regionLabel && (
-            <div className="absolute left-5 right-5 top-[42%] rounded-md border-2 border-gold bg-gold-soft/70 px-3 py-2 shadow-sm">
-              <div className="text-[10px] uppercase tracking-wide text-gold font-semibold">{regionLabel}</div>
-              <div className="h-2 w-2/3 bg-gold/30 rounded mt-1" />
+            <div className="mt-4 rounded-md border-2 border-gold bg-gold-soft/80 px-3 py-2 shadow-sm">
+              <div className="text-[10px] uppercase tracking-wide text-gold font-semibold">Highlighted region</div>
+              <div className="text-xs text-ink mt-0.5">{regionLabel}</div>
             </div>
           )}
 
-          <div className="space-y-2 mt-16">
-            <div className="h-2 w-3/4 bg-surface-sunken rounded" />
-            <div className="h-2 w-1/2 bg-surface-sunken rounded" />
+          <div className="mt-auto pt-6 text-[10px] text-ink-muted/70 italic text-center">
+            Simulated document preview — not a real scan.
           </div>
         </div>
       </div>
