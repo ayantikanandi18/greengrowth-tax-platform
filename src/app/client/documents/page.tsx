@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRole } from "@/lib/context/RoleContext";
 import { getClient, getDocumentsForReturn, getReturnForClient } from "@/lib/mock/data";
 import type { TaxDocument } from "@/lib/mock/types";
@@ -13,18 +13,27 @@ export default function ClientDocuments() {
   const taxReturn = client ? getReturnForClient(client.id) : null;
   const [extra, setExtra] = useState<TaxDocument[]>([]);
   const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!client || !taxReturn) return null;
   const documents = [...getDocumentsForReturn(taxReturn.id), ...extra];
 
-  function handleUpload() {
+  // Uses the real filename picked from disk instead of a hardcoded
+  // placeholder — the document list is meant to be scannable by name for
+  // both the client and their preparer, and "Uploaded Document.pdf"
+  // repeated for every upload defeats that.
+  function handleFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
     setUploading(true);
     setTimeout(() => {
       setExtra((prev) => [
         {
           id: `d-upload-${prev.length}`,
           returnId: taxReturn!.id,
-          name: "Uploaded Document.pdf",
+          name: file.name,
           docType: "Other",
           category: "Correspondence",
           uploadedAt: new Date().toISOString(),
@@ -44,13 +53,21 @@ export default function ClientDocuments() {
         title="Documents"
         crumbs={[{ label: "My Return", href: "/client" }, { label: "Documents" }]}
         actions={
-          <button
-            onClick={handleUpload}
-            disabled={uploading}
-            className="text-sm font-medium bg-navy text-white px-4 py-2 rounded-lg hover:bg-navy-strong transition-colors disabled:opacity-60"
-          >
-            {uploading ? "Uploading…" : "Upload document"}
-          </button>
+          <>
+            <input
+              ref={fileInputRef}
+              type="file"
+              onChange={handleFileSelected}
+              className="hidden"
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="text-sm font-medium bg-navy text-white px-4 py-2 rounded-lg hover:bg-navy-strong transition-colors disabled:opacity-60"
+            >
+              {uploading ? "Uploading…" : "Upload document"}
+            </button>
+          </>
         }
       />
       <div className="p-8 max-w-3xl mx-auto">
