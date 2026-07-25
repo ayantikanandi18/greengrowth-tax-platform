@@ -436,6 +436,75 @@ export const SARAH_FIELDS: ExtractedField[] = [
 ];
 
 // ---------------------------------------------------------------------------
+// Extracted fields — Rivera Consulting's return. A second, business-flavored
+// field set so "locked" and "editable" aren't only ever demonstrated on
+// Sarah's return — and one field closes a loop that was open before: the
+// existing K-1 warning insight had no field to actually attach to.
+// ---------------------------------------------------------------------------
+
+export const RIVERA_FIELDS: ExtractedField[] = [
+  {
+    id: "f-rivera-gross-receipts",
+    returnId: "r-rivera-2025",
+    fieldLabel: "Schedule C, Line 1 — Gross Receipts",
+    value: "$284,600",
+    sources: [
+      { documentId: "d-rivera-bank-q1", page: 1, regionLabel: "Total deposits, Q1" },
+      { documentId: "d-rivera-bank-q2", page: 1, regionLabel: "Total deposits, Q2" },
+    ],
+    transformation: "Sum of deposits from 2 quarterly bank statements",
+    dataState: "ai-suggested",
+    confidence: 0.91,
+  },
+  {
+    id: "f-rivera-expenses",
+    returnId: "r-rivera-2025",
+    fieldLabel: "Schedule C, Line 27a — Total Business Expenses",
+    value: "$96,340",
+    sources: Array.from({ length: 5 }).map((_, i) => ({
+      documentId: `d-rivera-${i}`,
+      page: 1,
+      regionLabel: "Receipt total",
+    })),
+    transformation: "Sum of categorized business expense receipts",
+    dataState: "ai-suggested",
+    confidence: 0.85,
+  },
+  {
+    id: "f-rivera-depreciation",
+    returnId: "r-rivera-2025",
+    fieldLabel: "Schedule C, Line 13 — Depreciation (Section 179)",
+    value: "$8,400",
+    sources: [{ documentId: "d-rivera-5", page: 1, regionLabel: "Equipment purchase" }],
+    transformation: "Confirmed against equipment purchase receipt",
+    dataState: "verified",
+    confidence: 0.96,
+  },
+  {
+    id: "f-rivera-k1-income",
+    returnId: "r-rivera-2025",
+    fieldLabel: "Schedule E, Line 28 — Partnership Income (K-1)",
+    value: "$14,200",
+    sources: [{ documentId: "d-rivera-k1", page: 1, regionLabel: "Box 1 — Ordinary business income" }],
+    transformation: "Reported on Schedule K-1 — passive vs. active treatment not yet confirmed",
+    dataState: "needs-input",
+    confidence: null,
+  },
+  {
+    id: "f-rivera-entity",
+    returnId: "r-rivera-2025",
+    fieldLabel: "Schedule C — Business Name & EIN",
+    value: "Rivera Consulting LLC · EIN 84-1029384",
+    sources: [],
+    transformation: "Confirmed directly with client, no source document",
+    dataState: "locked",
+    confidence: null,
+  },
+];
+
+export const ALL_FIELDS: ExtractedField[] = [...SARAH_FIELDS, ...RIVERA_FIELDS];
+
+// ---------------------------------------------------------------------------
 // Tasks
 // ---------------------------------------------------------------------------
 
@@ -510,6 +579,7 @@ export const TASKS: Task[] = [
     dueDate: daysFromNow(20),
     blocking: false,
     linkedDocumentId: "d-rivera-k1",
+    linkedFieldId: "f-rivera-k1-income",
   },
   {
     id: "t-priya-questionnaire",
@@ -657,6 +727,7 @@ export const AI_INSIGHTS: AIInsight[] = [
   {
     id: "ai-rivera-warning-k1",
     returnId: "r-rivera-2025",
+    relatedFieldId: "f-rivera-k1-income",
     type: "warning",
     title: "K-1 income classification needs a human call",
     message: "This K-1 could be treated as passive or active partnership income depending on hours worked.",

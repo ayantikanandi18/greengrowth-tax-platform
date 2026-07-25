@@ -5,7 +5,7 @@
  * small artificial delay so the UI can demonstrate what an in-progress AI
  * action should feel like (not to pretend it's a real network call).
  */
-import { AI_INSIGHTS, SARAH_FIELDS } from "./generate";
+import { AI_INSIGHTS, ALL_FIELDS } from "./generate";
 import type { AIInsight, ExtractedField } from "./types";
 
 function delay<T>(value: T, ms = 550): Promise<T> {
@@ -17,7 +17,7 @@ export async function fetchInsightsForReturn(returnId: string): Promise<AIInsigh
 }
 
 export async function fetchFieldDetail(fieldId: string): Promise<ExtractedField | null> {
-  return delay(SARAH_FIELDS.find((f) => f.id === fieldId) ?? null);
+  return delay(ALL_FIELDS.find((f) => f.id === fieldId) ?? null);
 }
 
 export interface ReCheckResult {

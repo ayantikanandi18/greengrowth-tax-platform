@@ -1,12 +1,12 @@
 import {
   AI_INSIGHTS,
   ALL_DOCUMENTS,
+  ALL_FIELDS,
   CLIENTS,
   MESSAGES,
   NOW,
   QUESTIONNAIRE_ITEMS,
   RETURNS,
-  SARAH_FIELDS,
   TASKS,
   USERS,
 } from "./generate";
@@ -15,12 +15,12 @@ import { STATUS_META, type ReturnStatus, type Role, type Task } from "./types";
 export {
   AI_INSIGHTS,
   ALL_DOCUMENTS,
+  ALL_FIELDS,
   NOW,
   CLIENTS,
   MESSAGES,
   QUESTIONNAIRE_ITEMS,
   RETURNS,
-  SARAH_FIELDS,
   TASKS,
   USERS,
   STATUS_META,
@@ -48,7 +48,7 @@ export function getDocumentsForReturn(returnId: string) {
 }
 
 export function getFieldsForReturn(returnId: string) {
-  return SARAH_FIELDS.filter((f) => f.returnId === returnId);
+  return ALL_FIELDS.filter((f) => f.returnId === returnId);
 }
 
 export function getTasksForReturn(returnId: string) {
