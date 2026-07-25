@@ -64,4 +64,4 @@ Click the account switcher in the top-right corner. There are 8 demo logins span
 
 ## Stack
 
-Next.js (App Router) + TypeScript + Tailwind CSS v4, Framer Motion, `@faker-js/faker` for realistic mock data. No backend, no database, no environment variables required.
+Next.js (App Router) + TypeScript + Tailwind CSS v4, Framer Motion, `@faker-js/faker` for realistic mock data. 
