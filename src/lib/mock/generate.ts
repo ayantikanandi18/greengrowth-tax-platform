@@ -284,17 +284,22 @@ function buildRiveraDocuments(): TaxDocument[] {
   const docs: TaxDocument[] = [];
   for (let i = 0; i < 244; i++) {
     const [kind, vendor] = faker.helpers.arrayElement(EXPENSE_VENDORS_KINDS);
+    // Every entry in EXPENSE_VENDORS_KINDS is, by construction, a business
+    // expense — the category picked here used to be a fully independent
+    // random draw that included "Income" and "Correspondence," so a
+    // utility bill from Pacific Power & Light could land in "Income"
+    // purely by chance, with docType following it into "Invoice." Expense
+    // receipts can only ever land in a category that's actually about an
+    // expense.
     const category = faker.helpers.weightedArrayElement([
       { value: "Business Expenses", weight: 8 },
-      { value: "Income", weight: 1 },
       { value: "Deductions", weight: 2 },
-      { value: "Correspondence", weight: 1 },
     ]) as DocumentCategory;
     docs.push({
       id: `d-rivera-${i}`,
       returnId: "r-rivera-2025",
       name: `${kind} Receipt — ${vendor}`,
-      docType: category === "Income" ? "Invoice" : "Receipt",
+      docType: "Receipt",
       category,
       uploadedAt: daysAgo(faker.number.int({ min: 1, max: 200 })),
       uploadedBy: faker.helpers.arrayElement(["client", "preparer"]),
