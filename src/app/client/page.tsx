@@ -11,6 +11,7 @@ import {
   getQuestionnaireForClient,
   getReturnForClient,
   getTasksForReturn,
+  rankTasksByUrgency,
 } from "@/lib/mock/data";
 import PageHeader from "@/components/PageHeader";
 import StatusPill from "@/components/StatusPill";
@@ -36,9 +37,11 @@ export default function ClientHome() {
   const questionnaireDone = questionnaire.every((q) => q.answer || sessionAnswers[q.id]);
 
   const allTasks = getTasksForReturn(taxReturn.id);
-  const myOpenTasks = allTasks
-    .filter((t) => t.ownerRole === "client" && t.status === "open")
-    .filter((t) => !(t.id === QUESTIONNAIRE_TASK_ID && questionnaireDone));
+  const myOpenTasks = rankTasksByUrgency(
+    allTasks
+      .filter((t) => t.ownerRole === "client" && t.status === "open")
+      .filter((t) => !(t.id === QUESTIONNAIRE_TASK_ID && questionnaireDone)),
+  );
 
   const documents = getDocumentsForReturn(taxReturn.id);
   const messages = getMessagesForReturn(taxReturn.id).filter((m) => m.visibility === "client");

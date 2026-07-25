@@ -4,6 +4,7 @@ import {
   getMessagesForReturn,
   getReturn,
   getTasksForReturn,
+  rankTasksByUrgency,
 } from "@/lib/mock/data";
 import StatusProgress from "@/components/StatusProgress";
 import ReturnInsights from "./ReturnInsights";
@@ -17,7 +18,7 @@ export default async function ReturnOverview({ params }: { params: Promise<{ id:
   if (!taxReturn) notFound();
 
   const tasks = getTasksForReturn(id);
-  const openTasks = tasks.filter((t) => t.status === "open");
+  const openTasks = rankTasksByUrgency(tasks.filter((t) => t.status === "open"));
   const documents = getDocumentsForReturn(id);
   const messages = getMessagesForReturn(id);
   const insights = getInsightsForReturn(id).filter((i) => i.status === "pending").slice(0, 2);

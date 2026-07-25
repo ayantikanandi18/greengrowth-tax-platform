@@ -10,7 +10,7 @@ import {
   TASKS,
   USERS,
 } from "./generate";
-import { STATUS_META, type ReturnStatus, type Role } from "./types";
+import { STATUS_META, type ReturnStatus, type Role, type Task } from "./types";
 
 export {
   AI_INSIGHTS,
@@ -116,6 +116,24 @@ export function returnUrgency(taxReturn: (typeof RETURNS)[number]) {
   const ownerRole = STATUS_META[taxReturn.status].blocking ? STATUS_META[taxReturn.status].ownerRole : (blockingTask?.ownerRole ?? STATUS_META[taxReturn.status].ownerRole);
 
   return { blocking, nextDueDate, isTaskDriven, openTaskCount: openTasks.length, ownerRole };
+}
+
+const PRIORITY_ORDER: Task["priority"][] = ["high", "medium", "low"];
+
+/**
+ * Same "blocking first, then soonest deadline" rule the returns ranking
+ * uses, applied one level down — a return's task list should never bury
+ * its own most urgent task under whatever order it happened to be seeded
+ * in, or the return-level ranking above it would be lying by omission.
+ */
+export function rankTasksByUrgency(tasks: Task[]) {
+  return [...tasks].sort((a, b) => {
+    if (a.blocking !== b.blocking) return a.blocking ? -1 : 1;
+    const aDue = new Date(a.dueDate).getTime();
+    const bDue = new Date(b.dueDate).getTime();
+    if (aDue !== bDue) return aDue - bDue;
+    return PRIORITY_ORDER.indexOf(a.priority) - PRIORITY_ORDER.indexOf(b.priority);
+  });
 }
 
 export function rankReturnsByUrgency(returns: (typeof RETURNS)[number][]) {
