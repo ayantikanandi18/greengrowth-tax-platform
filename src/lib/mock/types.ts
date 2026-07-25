@@ -36,9 +36,13 @@ export interface StatusMeta {
   clientLabel: string;
   staffLabel: string;
   description: string;
+  /** Plain-language "what happens after this" — the answer to "what's next," always visible, never just a tooltip. */
+  whatsNext: string;
   color: "muted" | "warning" | "info" | "good";
   blocking: boolean;
   ownerRole: Role | "none";
+  /** Which of the 4 client-facing milestones this internal status belongs to — see MILESTONES. */
+  milestone: number;
 }
 
 export const STATUS_META: Record<ReturnStatus, StatusMeta> = {
@@ -46,59 +50,80 @@ export const STATUS_META: Record<ReturnStatus, StatusMeta> = {
     clientLabel: "Let's get started",
     staffLabel: "Not Started",
     description: "The return hasn't been opened yet.",
+    whatsNext: "Your preparer will request the documents needed to begin.",
     color: "muted",
     blocking: false,
     ownerRole: "preparer",
+    milestone: 0,
   },
   awaiting_documents: {
     clientLabel: "Action needed: upload your documents",
     staffLabel: "Awaiting Documents (Client)",
     description: "Waiting on the client to upload requested documents.",
+    whatsNext: "Once documents are in, preparation starts.",
     color: "warning",
     blocking: true,
     ownerRole: "client",
+    milestone: 0,
   },
   in_preparation: {
     clientLabel: "We're preparing your return",
     staffLabel: "In Preparation",
     description: "Preparer is actively working on the return.",
+    whatsNext: "Once everything is entered, it moves to final review.",
     color: "info",
     blocking: false,
     ownerRole: "preparer",
+    milestone: 1,
   },
   awaiting_client_response: {
     clientLabel: "Action needed: answer a question",
     staffLabel: "Awaiting Client Response",
     description: "Preparer asked a question that's blocking progress.",
+    whatsNext: "Once you reply, preparation picks back up.",
     color: "warning",
     blocking: true,
     ownerRole: "client",
+    milestone: 1,
   },
   in_review: {
     clientLabel: "Final review in progress",
     staffLabel: "In Review",
     description: "A reviewer is checking the completed return.",
+    whatsNext: "Once review passes, it's ready for your signature.",
     color: "info",
     blocking: false,
     ownerRole: "reviewer",
+    milestone: 2,
   },
   ready_to_file: {
     clientLabel: "Action needed: review & sign to file",
     staffLabel: "Ready for Signature",
     description: "Return is complete and awaiting the client's e-signature.",
+    whatsNext: "Once you sign, we file it with the IRS.",
     color: "good",
     blocking: true,
     ownerRole: "client",
+    milestone: 3,
   },
   filed: {
     clientLabel: "Filed",
     staffLabel: "Filed",
     description: "The return has been filed.",
+    whatsNext: "Nothing further — the return is complete.",
     color: "good",
     blocking: false,
     ownerRole: "none",
+    milestone: 3,
   },
 };
+
+/**
+ * The client-facing journey, collapsed from 7 internal statuses to 4
+ * milestones — "solve without exposing unnecessary internal complexity to
+ * the client." Staff see the same milestones plus their precise status.
+ */
+export const MILESTONES = ["Documents", "Preparation", "Review", "Sign & File"] as const;
 
 export type FormType = "1040" | "1040 + Schedule C" | "1120S";
 

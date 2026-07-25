@@ -14,6 +14,7 @@ import {
 } from "@/lib/mock/data";
 import PageHeader from "@/components/PageHeader";
 import StatusPill from "@/components/StatusPill";
+import StatusProgress from "@/components/StatusProgress";
 import TaskList from "@/components/TaskList";
 
 // The one task that represents "go fill out the questionnaire" — once every
@@ -53,6 +54,8 @@ export default function ClientHome() {
       />
 
       <div className="p-8 max-w-3xl mx-auto space-y-6">
+        <StatusProgress status={taxReturn.status} audience="client" updatedAt={taxReturn.updatedAt} />
+
         {needsQuestionnaire ? (
           // Challenge 03 — brand-new client: exactly one clear next action, nothing else competing for attention.
           <div className="rounded-xl border border-navy/20 bg-navy text-white p-6">

@@ -114,6 +114,20 @@ export function roleLabel(role: Role) {
   return { client: "Client", preparer: "Preparer", reviewer: "Reviewer", admin: "Firm Admin" }[role];
 }
 
+/**
+ * "Who owns the next action" in plain language — the same underlying
+ * ownerRole read two ways so a client never sees internal role vocabulary
+ * ("Preparer") and staff never see the flattened "You" that only makes
+ * sense from a client's seat.
+ */
+export function ownerDisplay(ownerRole: Role | "none", audience: "client" | "staff") {
+  if (ownerRole === "none") return "No one — it's done";
+  if (audience === "client") {
+    return { client: "You", preparer: "Your preparer", reviewer: "The reviewer", admin: "Your firm" }[ownerRole];
+  }
+  return roleLabel(ownerRole);
+}
+
 export function clientDisplayName(clientId: string) {
   const c = getClient(clientId);
   if (!c) return "Unknown client";
