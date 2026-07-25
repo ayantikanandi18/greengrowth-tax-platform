@@ -187,7 +187,16 @@ export default function ReturnDocuments({ params }: { params: Promise<{ id: stri
             {selectedDoc && (
               <div className="space-y-3">
                 <div className="card p-4">
-                  <div className="text-sm font-medium">{selectedDoc.name}</div>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="text-sm font-medium">{selectedDoc.name}</div>
+                    <button
+                      onClick={() => setSelectedDocId(null)}
+                      aria-label="Close document detail"
+                      className="text-ink-muted hover:text-ink text-xs shrink-0"
+                    >
+                      ✕
+                    </button>
+                  </div>
                   <dl className="mt-2 space-y-1 text-xs text-ink-muted">
                     <div className="flex justify-between">
                       <dt>Category</dt>
