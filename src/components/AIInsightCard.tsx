@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { requestAIRecheck } from "@/lib/mock/ai-stub";
+import { checkForDuplicate, requestAIRecheck } from "@/lib/mock/ai-stub";
 import { getDocument, type AIInsight, type ExtractedField } from "@/lib/mock/data";
 import { IconSparkle } from "./icons";
 
@@ -21,8 +21,11 @@ export default function AIInsightCard({
   /** Fires once, the moment "pending" resolves either direction — lets a
    * host page flip the field's own badge to Verified so approving an
    * AI suggestion visibly closes the loop instead of only updating this
-   * card's own buttons. */
-  onResolved?: () => void;
+   * card's own buttons. Passes a new value when the recheck produced an
+   * actual correction, not just a confirmation — otherwise a "corrected"
+   * field would say so in the explanation text while the value shown
+   * everywhere else silently stayed the old one. */
+  onResolved?: (newValue?: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [status, setStatus] = useState(insight.status);
@@ -38,6 +41,16 @@ export default function AIInsightCard({
 
   async function handleRecheck() {
     if (!field) {
+      // No linked field means this insight is about something else entirely
+      // (e.g. a possible duplicate document) — still worth an actual fake
+      // check with real feedback, not a silent, unexplained status flip.
+      if (insight.type === "correction" && insight.evidence[0]) {
+        setChecking(true);
+        const doc = getDocument(insight.evidence[0].documentId);
+        const result = await checkForDuplicate(doc?.name ?? "this document");
+        setChecking(false);
+        setRecheckNote(result.explanation);
+      }
       setStatus("corrected");
       onResolved?.();
       return;
@@ -47,7 +60,7 @@ export default function AIInsightCard({
     setChecking(false);
     setRecheckNote(result.explanation);
     setStatus("corrected");
-    onResolved?.();
+    onResolved?.(result.newValue !== field.value ? result.newValue : undefined);
   }
 
   return (

@@ -154,7 +154,10 @@ export default function ReturnReview({ params }: { params: Promise<{ id: string 
                   key={insight.id}
                   insight={insight}
                   field={selected}
-                  onResolved={() => setFieldOverrides((prev) => ({ ...prev, [selected.id]: "verified" }))}
+                  onResolved={(newValue) => {
+                    setFieldOverrides((prev) => ({ ...prev, [selected.id]: "verified" }));
+                    if (newValue) setFieldValues((prev) => ({ ...prev, [selected.id]: newValue }));
+                  }}
                 />
               ))}
             </>

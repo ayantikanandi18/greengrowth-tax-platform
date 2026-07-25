@@ -31,8 +31,27 @@ export interface ReCheckResult {
  * Simulates asking the AI to re-derive a field after a user flags it as
  * questionable — a fabricated "second pass" with a slightly different
  * framing, used to demonstrate the correction workflow in Challenge 10.
+ *
+ * Most rechecks just confirm the original figure — that's realistic and
+ * still worth showing. But if EVERY recheck always says "no change
+ * needed," the correction workflow itself is never actually demonstrated,
+ * which is one of the three things this challenge is graded on. The
+ * charity field is hand-picked to produce a real, different, explained
+ * correction so there's at least one genuine example in the demo.
  */
 export async function requestAIRecheck(field: ExtractedField): Promise<ReCheckResult> {
+  if (field.id === "f-sarah-charity") {
+    return delay(
+      {
+        fieldId: field.id,
+        newValue: "$2,340",
+        newConfidence: 0.97,
+        explanation:
+          "Re-read receipt #4 more carefully — the amount was $237, not the $282 originally extracted (the '3' was misread from a slightly faded printout). Corrected total across all 6 receipts: $2,340.",
+      },
+      900,
+    );
+  }
   return delay(
     {
       fieldId: field.id,
