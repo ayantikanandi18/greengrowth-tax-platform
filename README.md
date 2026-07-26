@@ -2,36 +2,110 @@
 
 A prototype tax-prep platform for **GreenGrowth CPAs** — a from-scratch client/CPA workflow product covering document intake, AI-assisted review, cross-role collaboration, and filing status, designed around one question: *what does someone actually need to do next?*
 
-This was built as a take-home product/design exercise. It's a real, clickable Next.js app — not a static mockup — but everything behind the UI is intentionally simulated (see "What's real vs. simulated" below).
+Built as a take-home product/design exercise: 10 open-ended design challenges, no prescribed UI, no backend requirement. It's a real, clickable Next.js app, not a static mockup — but everything behind the UI is intentionally simulated. See below for exactly where that line is.
 
-**Live prototype: https://greengrowth-tax-platform-pi.vercel.app**
+**Live: https://greengrowth-tax-platform-pi.vercel.app**
 
-## At a glance
+---
 
-- **One product, four roles** — Client, Preparer, Reviewer, Firm Admin — switchable from the same account (the account switcher, top right), each seeing a different shell built off the exact same data and components rather than four separate apps.
-- **5 demo clients, each at a different stage on purpose** — brand-new/onboarding, mid-review with AI-suggested values to check, a business return with 249 documents, a blocked/overdue return, and a firm employee who is *also* a client. See the table below.
-- **What it demonstrates**, one screen each: source-to-document traceability with a real document viewer; client↔CPA messaging with outstanding-request tracking; first-time onboarding that visibly changes once it's done; cross-object deep-linking that never loses your place; role-based permissions enforced consistently across every path into a return; a status/progress model that means the same thing to a client and a preparer; a dashboard ranked by real urgency logic, not a static list; one consistent visual language for what's clickable/editable/AI-generated/locked; search, filtering, and pagination tested against 249 real mock documents; and an AI review flow with a correction path that actually corrects something. Full breakdown, screen by screen, below.
-- **What's real:** all routing and UI logic, the prioritization/ranking algorithms, search/filter, the role-permission system, and the deep-linking trail.
-- **What's simulated:** the "AI" (hand-authored fake responses behind an artificial delay — no model call), authentication (a role switcher over a fixed list of demo users, not real login), and persistence (no backend, no database — everything resets on refresh).
-- **Why it looks the way it does:** this is my response to a confidential take-home case study for a CPA-firm tax platform — 10 open-ended design challenges, no prescribed UI. Every decision described below is my own interpretation, in my own words.
+## What's genuinely wired up vs. simulated
 
-## Running it
+**Real:** the Next.js app end to end — routing, all UI logic, the role-based permission system (enforced consistently across every path into a return, not just in the nav), the prioritization/ranking algorithms behind the dashboard, the status/progress state machine, search/filter/pagination against a 249-document dataset, and the deep-linking/back-navigation trail connecting messages → tasks → documents → fields.
+
+**Simulated, by design** — this is what "keep it quick and dirty, simulate the AI" meant in practice for a 10-challenge take-home, not a shortcut I'd defend for production:
+- **No real AI/LLM call anywhere.** `lib/mock/ai-stub.ts` is the seam — a handful of functions (`requestAIRecheck`, `checkForDuplicate`) that return hand-authored plausible JSON behind an artificial delay, so a "re-check" *feels* like a network round-trip without one existing. If this were wired to a real model, this file is exactly where that call would go; the call sites and UI states around it wouldn't need to change.
+- **No OCR, no document parsing.** The "document viewer" renders a layout templated by document type (W-2/1099 as boxed IRS-style fields, receipts as line items, bank statements as a transaction list) using data already on the record — not a real file, not an extracted image.
+- **No backend, no database.** All data — clients, returns, documents, tasks, messages, AI insights — is generated once at process start from a seeded `@faker-js/faker` run plus hand-authored records (`lib/mock/generate.ts`), then queried in-memory (`lib/mock/data.ts`). Nothing is written anywhere; a "write" (uploading a file, sending a message, confirming a field value) only updates local React state and is gone on refresh.
+- **No real auth.** The account switcher is a UI convenience over a fixed list of 8 demo users, persisted client-side via `localStorage` so a refresh keeps whichever persona you last picked — that's the *only* thing that survives a reload.
+
+### Decisions worth explaining
+
+- **Two roles built in full** (Client, Preparer); Reviewer and Firm Admin are lighter, adapted views of the same shell rather than two more fully independent UIs. Six roles as six separate products defeats the point of the exercise — the interesting problem is one architecture flexing across roles, which two fully-built roles plus two adapted ones already proves.
+- **Business-owner and seasonal-staff are represented as variations, not separate builds** — Elena Rivera's client view on a business return (same role, different data shape) and Jordan Osei's preparer account with a visibly reduced permission set, respectively.
+- **The dashboard's urgency ranking is a plain rules-based sort** (blocking status, then nearest real deadline — pulling in task-level due dates, not just the return's own status), not a scored model. A small script over mock data is the right amount of engineering for what's being evaluated here.
+- **Category taxonomy for Rivera's generated documents is keyed deterministically to vendor type**, not drawn independently at random — an earlier pass let a utility bill land under "Income" purely by chance, which is the kind of bug that looks fine in a demo and wrong the moment someone actually clicks around.
+
+---
+
+## Quick start
+
+**Prerequisites:** Node 20+, npm.
 
 ```bash
+git clone https://github.com/ayantikanandi18/greengrowth-tax-platform.git
+cd greengrowth-tax-platform
 npm install
 npm run dev
 ```
 
-Open http://localhost:3000. No login, no environment variables, no database — everything is seeded, deterministic mock data generated at load time.
+Open **http://localhost:3000**. No environment variables, no `.env` file, no database to provision — the dev server is immediately usable. If port 3000 is already taken locally, Next.js will pick the next free port and print it to the terminal; use whatever it reports.
 
-### Switching roles / demo users
+Other scripts:
 
-Click the account switcher in the top-right corner. There are 8 demo logins spanning 4 roles:
+```bash
+npm run build   # production build
+npm run start   # serve the production build locally (after build)
+npm run lint    # eslint
+```
+
+There's no test suite — verification for this project was done by hand against each of the 10 design challenges (typecheck + lint clean, then click-through per feature), not automated tests, given the scope and timeline.
+
+---
+
+## Deploying
+
+This is a standard Next.js App Router project — any platform with first-class Next.js support works. It was actually deployed to **Vercel**:
+
+**Via the dashboard (no CLI needed):**
+1. Push the repo to your own GitHub account.
+2. [vercel.com/new](https://vercel.com/new) → import the repo. Framework is auto-detected as Next.js.
+3. No environment variables to configure — leave that section empty and deploy.
+4. Every subsequent push to `main` auto-deploys via Vercel's GitHub integration.
+
+**Via the CLI, if you'd rather not go through GitHub:**
+```bash
+npm i -g vercel
+vercel login
+vercel --prod
+```
+Accept the defaults it infers (Next.js, build command `next build`, output `.next`). `.vercel/` is gitignored on purpose — it holds your own account's project link, not something to share or inherit from this repo.
+
+---
+
+## Project structure
+
+```
+src/
+  app/                       Next.js App Router routes — one folder per URL
+    client/                    Client-role screens: My Return, Documents, Messages, Questionnaire
+    preparer/
+      returns/[id]/              Per-return workspace — layout.tsx adds the Overview/Review/Documents/Messages tabs
+    reviewer/, admin/          Lighter role-specific views, reusing the same components as preparer/client
+    layout.tsx                 Root layout — wraps everything in RoleProvider + QuestionnaireProvider + AppShell
+  components/                 Shared UI: AppShell, Sidebar, DataStateBadge, DocumentViewer,
+                               AIInsightCard, StatusPill/StatusProgress, TaskList, BackToBanner
+  lib/
+    context/                   RoleContext (active persona/role, SSR-safe via useSyncExternalStore),
+                               QuestionnaireContext (onboarding progress)
+    mock/
+      generate.ts                 All seed data — the "database" (seeded faker + hand-authored records)
+      data.ts                      Query functions + business logic (ranking, status labels) over that data
+      types.ts                     Shared TypeScript types, STATUS_META
+      ai-stub.ts                   Fake AI response functions — see "What's simulated" above
+```
+
+Same shell (`AppShell` → `Sidebar`/`TopNav`) renders differently per role by reading `activeRole` from context — there are four route trees for four roles, not four separate apps stitched together.
+
+---
+
+## Demo accounts
+
+Click the account switcher, top right. 8 logins across 4 roles:
 
 | User | Role(s) | Why they exist |
 |---|---|---|
-| **Ayantika Nandi** | Preparer *and* Client | The primary preparer account — also has their own personal return, to demonstrate a firm employee who is also a client (switch roles from the same account) |
-| **Jordan Osei** | Preparer (seasonal) | Same shell, visibly reduced permissions banner |
+| **Ayantika Nandi** | Preparer *and* Client | Primary preparer account — also has their own personal return, to demonstrate a firm employee who is also a client (switch roles from the same account) |
+| **Jordan Osei** | Preparer (seasonal) | Same shell, genuinely reduced permissions — not just a banner |
 | **Dana Whitfield** | Reviewer | Sees only returns in final review |
 | **Alex Whitcombe** | Firm Admin | Firm-wide overview |
 | **Sarah Chen** | Client | Individual return mid-review — the main traceability walkthrough |
@@ -39,38 +113,25 @@ Click the account switcher in the top-right corner. There are 8 demo logins span
 | **David Okafor** | Client | Blocked return (missing a document) — dashboard urgency example |
 | **Priya Nair** | Client | Brand-new client, zero data, 3 unanswered questionnaire items — the first-time onboarding walkthrough |
 
+---
+
 ## How this maps to the assignment
 
 *(Described in my own words — not reproducing the brief's proprietary language, since the source document was marked confidential.)*
 
 - **Traceability** — `/preparer/returns/r-sarah-2025/review`. Click any return field on the left; the right panel shows the exact source document, the region on it, and the transformation applied. Fields backed by more than one document (wages = 2 W-2s, the charitable deduction = 6 receipts) show a chip for **every** contributing source — click through each one rather than only ever seeing the first. AI-suggested and needs-input fields also surface their linked `AIInsightCard` right there (e.g. the AGI field explains exactly why it can't be finalized yet). Rivera Consulting's return has its own 5-field Schedule C set too, not just Sarah's — a second, business-flavored example of the same locked/verified/AI-suggested/needs-input mix, with the existing "K-1 needs a human call" insight and its task both linked to a real field instead of just a document.
 - **Client/CPA collaboration** — `/preparer/returns/[id]/messages` and `/client/messages`. Internal-vs-client-visible toggle; messages link back to both specific documents *and* specific tasks (David Okafor's "missing W-2" message links straight to that task). The Outstanding Requests panel groups client-visible messages into threads and shows **who owns the next reply** — whoever didn't send the last message — plus a "Mark resolved" action so a thread can actually be closed, not just listed forever.
-- **First-time onboarding** — log in as **Priya Nair** (Client, zero documents, zero messages). The home screen shows exactly one action — a real 3-question intake questionnaire, not just a task title — and the "Questionnaire" nav tab only exists while there's something left to answer. Answer all three and, in the same session, the home screen and nav update immediately: the hero switches to "Now let's get your documents," the Questionnaire tab disappears from the sidebar, and the (previously hidden) documents/messages stat tiles appear — a genuine live before/after of "how the interface changes once onboarding is done," not just two different demo accounts side by side. Every client's "next action" card also only ever features one task at a time; any additional open tasks appear below it without repeating the featured one.
-- **Cross-object navigation** — global nav (`Sidebar`) stays constant; contextual nav (`ReturnTabs`) only exists inside a specific return. From any return's Overview tab, click a task that references a document, a message, *or a specific field* (most-specific link wins — "Finalize AGI calculation" jumps straight to the AGI field pre-selected on the review screen, not just the review tab in general). You land there with a gold "← Back to [task]" banner and a real deep-linkable URL (`?field=...&fromLabel=...&fromHref=...`) — your place is never lost, and the same link works if bookmarked or shared.
-- **Role-aware experience** — the same shell (`AppShell` → `Sidebar`/`TopNav`) re-renders its global nav per active role. Two roles (Client, Preparer) are fully built out; Reviewer and Firm Admin get lighter, adapted views reusing the same components (the Reviewer queue links straight into the same traceability screen preparers use). Permissions aren't just a label — inside a return, `ReturnTabs`/`ReturnShortcuts`/`ReturnTaskList`/`ReturnInsights` all filter by role from the same rule set: a seasonal preparer (Jordan Osei) genuinely cannot reach a review action through *any* path (the Review & Traceability tab, a shortcut card, a task link, or the "Looks right"/"Something's off" buttons on an Overview AI insight — verified all four independently), and a reviewer gets no Documents tab. A firm employee with their own personal return (Ayantika Nandi) switches identity via the same account, and any list that could show both her staff and client rows (the Admin firm-wide view, a colleague's client list) labels the personal one explicitly so it never reads as a stray duplicate. Business-owner and seasonal-staff are represented as variations rather than six separate screen sets — noted below.
-- **Status & progress** — one internal state machine (`STATUS_META` in `lib/mock/types.ts`, 7 statuses), rendered two ways off the exact same data so client and staff can never drift apart. A compact `StatusPill` (label + color) sits in every header/list row; the full `StatusProgress` panel — on the client home page and the return Overview tab — answers all five things the brief asks for in one glance instead of a hover tooltip: a 4-milestone stepper for *where it is* and *what's already happened* (7 internal statuses collapsed to 4 client-facing milestones — Documents, Preparation, Review, Sign & File — so staff nuance like "Awaiting Client Response" never leaks into the client's mental model), a always-visible "Next:" sentence for *what happens next*, an explicit Owner field for *who owns the next action* (plain language for clients — "You" / "Your preparer" — vs. the real role name for staff), and a red "Blocking" badge only when something's actually stuck.
-- **Actionable dashboard** — `/preparer`. Sorted by real logic (`rankReturnsByUrgency`/`returnUrgency`): blocking first, then by the nearest actual deadline — not a static list, and not just the return's own status. A return whose status looks calm can still be sitting on a blocking, high-priority task with its own closer due date (Sarah's "In Review" return has a blocking task due in 4 days, well before her 30-day filing deadline); the ranking pulls open-task urgency in, not just the headline status, and the row says "from an open task" when that's what's actually driving the date shown. A search box and a click-to-filter "Blocked" stat tile keep the list usable as it grows — the same ranking function works unchanged whether it's given 5 returns or 500. **Individual preparers** get this list scoped to their own clients by default (`getReturnsForPreparer`), with a toggle to see the whole firm; **managers** get a parallel view at `/admin` — the same urgency ranking applied firm-wide under "Needs attention," plus a staff workload panel showing which colleague is actually carrying blocking work, not just a raw returns-per-person count. The same rule (`rankTasksByUrgency`) applies one level down too — a return's own task list and a client's "next step" card are both sorted blocking-first, so landing inside a return after clicking a dashboard row doesn't reshuffle back to arbitrary seed order.
-- **Clickable vs. editable** — `DataStateBadge` + `dataStateContainerClasses`: one consistent visual language (AI-suggested / verified / locked / needs-input) reused across three screens — the field-by-field Review & Traceability screen, a live count summary on the return Overview's shortcut card, and the same summary on a reviewer's queue, all off the exact same field data so a preparer or reviewer can see what still needs attention without opening the review screen at all. Every state is distinct and demonstrated for real, not just labeled: "Locked" is clickable, not disabled — clicking Sarah's locked Filing Status field shows *why* it can't change ("Confirmed directly with client, no source document"). "Needs your input" is the one state that's genuinely **editable** — the AGI field renders a real text input pre-filled with the computed value, not just another clickable card; confirming it both updates the value shown and flips the badge to Verified. Approving an AI-suggested field's linked insight ("Looks right") does the same — the approval and the verified state are the same fact, not two disconnected UI elements.
-- **Complexity at scale** — Rivera Consulting's return has **249 real mock documents**, across categories that actually make sense (each generated receipt's category is keyed to its vendor kind — a utility bill can't randomly land under "Income" the way an earlier version of the generator let it). Search, category filters, a newest-first sort, a summary/detail toggle, pagination, and a click-through source-level detail panel (reusing the same `DocumentViewer` from the traceability screen) are all wired against that actual dataset, not a handful of demo rows. Deep links into a specific document (from a task or a message) override the aggregate-summary default and the pagination window that would otherwise hide a single document among 249 — a task linking to the Q2 bank statement (document #246 of 249) lands directly on it, selected, highlighted, and open in the detail panel, not on a category summary card with no way to find it.
-- **Trustworthy AI** — `AIInsightCard`, on the review screen and the return overview. Every insight shows what the "AI" found, a collapsible rationale, linked evidence documents, a confidence meter, and an "accept vs. something's off" flow that re-checks and closes the loop without leaving the page. The correction path is a real one, not just a confirmation dressed up as one: most rechecks confirm the original figure (realistic — that's what should usually happen), but Sarah's charity deduction is wired to come back with an actual different, explained value on recheck ("$2,340, not $2,385 — receipt #4 was misread"), and that correction visibly updates the value shown in the field list, not just the explanation text. A duplicate-document insight with no linked field gets its own real fake check (`checkForDuplicate`) instead of silently flipping to "resolved" with no explanation.
+- **First-time onboarding** — log in as **Priya Nair** (Client, zero documents, zero messages). The home screen shows exactly one action — a real 3-question intake questionnaire, not just a task title — and the "Questionnaire" nav tab only exists while there's something left to answer. Answer all three and, in the same session, the home screen and nav update immediately: the hero switches to "Now let's get your documents," the Questionnaire tab disappears from the sidebar, and the (previously hidden) documents/messages stat tiles appear — a genuine live before/after, not just two different demo accounts side by side.
+- **Cross-object navigation** — global nav (`Sidebar`) stays constant; contextual nav (`ReturnTabs`) only exists inside a specific return. From any return's Overview tab, click a task that references a document, a message, *or a specific field* (most-specific link wins — "Finalize AGI calculation" jumps straight to the AGI field pre-selected on the review screen). You land there with a gold "← Back to [task]" banner and a real deep-linkable URL (`?field=...&fromLabel=...&fromHref=...`) — your place is never lost, and the same link works if bookmarked or shared.
+- **Role-aware experience** — the same shell re-renders its global nav per active role. Permissions aren't just a label — inside a return, `ReturnTabs`/`ReturnShortcuts`/`ReturnTaskList`/`ReturnInsights` all filter by role from the same rule set: a seasonal preparer genuinely cannot reach a review action through *any* path (tab, shortcut card, task link, or an inline AI-insight button — verified all four independently), and a reviewer gets no Documents tab. A firm employee with their own personal return switches identity via the same account, and any list that could show both her staff and client rows labels the personal one explicitly so it never reads as a stray duplicate.
+- **Status & progress** — one internal state machine (`STATUS_META`, 7 statuses), rendered two ways off the exact same data so client and staff can never drift apart. A compact `StatusPill` sits in every header/list row; the full `StatusProgress` panel answers where it is, what's next, who owns it, and whether it's blocked in one glance instead of a hover tooltip — 7 internal statuses collapse to 4 client-facing milestones so staff-only nuance never leaks into the client's mental model.
+- **Actionable dashboard** — `/preparer`. Sorted by real logic: blocking first, then the nearest actual deadline, pulling in open-task urgency, not just the return's own headline status. Individual preparers get this scoped to their own clients; managers get a parallel firm-wide view at `/admin` with a staff workload panel showing who's actually carrying blocking work.
+- **Clickable vs. editable** — `DataStateBadge`: one visual language (AI-suggested / verified / locked / needs-input) reused across three screens. "Locked" is clickable, not disabled — it explains *why* a value can't change instead of just refusing input. "Needs your input" is the one state that's genuinely editable — a real text input, not another clickable card.
+- **Complexity at scale** — Rivera Consulting's return has **249 real mock documents**. Search, category filters, a newest-first sort, a summary/detail toggle, pagination, and a click-through detail panel are all wired against that actual dataset. Deep links into a specific document override the aggregate-summary default and the pagination window that would otherwise hide it.
+- **Trustworthy AI** — `AIInsightCard`. Every insight shows what the "AI" found, a collapsible rationale, linked evidence, a confidence meter, and an accept/correct flow that resolves without leaving the page. The correction path is real, not a confirmation dressed up as one — one field is wired to come back with an actual different, explained value on recheck, and that correction updates the value shown, not just the explanation text.
 
-## What's real vs. simulated
-
-**Real:** the Next.js app, all routing/navigation, the prioritization logic on the dashboard, the status/progress state machine, the search/filter/pagination on Rivera's 249 documents, the role-switching architecture, and the deep-linking/back-navigation trail.
-
-**Simulated, by design** (per the assignment's own instruction — this is what "keep it quick and dirty" and "simulate the AI" meant in practice):
-- There is no OCR, no document parsing, and no real AI/model call anywhere. `lib/mock/ai-stub.ts` returns hand-authored, plausible-looking JSON behind an artificial delay, so the UI can demonstrate what an in-progress AI action should feel like.
-- The "document viewer" is a stylized page mockup with a highlighted region — not a real PDF renderer.
-- All data (clients, returns, documents, tasks, messages, AI insights) is generated once from a seeded `@faker-js/faker` + hand-authored dataset (`lib/mock/generate.ts`) — nothing is persisted; refreshing the server resets nothing because nothing was ever written anywhere.
-- Uploading a document or sending a message updates local React state only — it isn't saved anywhere and won't survive a refresh.
-- There's no real authentication — the role switcher is a UI convenience over a fixed list of demo users.
-
-## Deliberate scope decisions
-
-- **Two roles built in full** (Client, Preparer); Reviewer and Admin are lighter, adapted views of the same shell. Building six fully independent experiences wasn't the point — showing *one architecture* flex across roles was.
-- **Business-owner** is represented by Elena Rivera's client view on a business return (same client role, different data shape); **seasonal staff** is Jordan Osei's preparer account with a visible reduced-permissions banner, rather than two more entirely separate UIs.
-- The forecast/urgency logic on the dashboard is a straightforward rules-based sort, not a scored ML model — matching the assignment's instruction that a small script over mock data is the right amount of engineering here.
+---
 
 ## Stack
 
-Next.js (App Router) + TypeScript + Tailwind CSS v4, Framer Motion, `@faker-js/faker` for realistic mock data. 
+Next.js 16 (App Router) + TypeScript + Tailwind CSS v4, Framer Motion, `@faker-js/faker` for mock data generation.
