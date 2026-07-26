@@ -8,41 +8,23 @@ Built as a take-home product/design exercise: 10 open-ended design challenges, n
 
 ---
 
-## Architecture
+## The problem this solves
 
-```mermaid
-flowchart LR
-    A[Browser] --> B["RoleContext<br/>active persona / role"]
-    B --> C["App Router pages<br/>client · preparer · reviewer · admin"]
-    C --> D["data.ts<br/>queries + ranking logic"]
-    D --> E["generate.ts<br/>seeded mock dataset"]
-    C -. fake delay .-> F["ai-stub.ts<br/>simulated AI responses"]
-```
+Practice-management and client-portal software in this space (Canopy, TaxDome, SmartVault, and similar) tends to fail the same few ways: client portals nobody actually logs into, status labels that mean one thing to staff and another to clients, AI features that show a confidence score with no reasoning so preparers re-check everything by hand anyway, permission rules that are enforced in the main nav but leak through a side door nobody tested, and dashboards that report instead of directing attention. This project is a from-scratch answer to those specific failure modes, not a general tax-prep clone — the point was showing each one is solvable with a small, deliberate amount of engineering: one shared status model instead of ambiguous labels, one role rule set applied consistently across *every* path into a screen instead of just the sidebar, a correction workflow where the AI can actually be shown wrong and fixed instead of always self-confirming, and a dashboard ranked by real urgency logic instead of a static list.
 
-No API layer, no database — `data.ts` plays the role a repository layer over a real DB would, just synchronous and in-memory. One example, because "single source of truth" is a claim worth showing, not just asserting:
+## What I'd improve with more time
 
-```ts
-// lib/mock/types.ts — one state machine, rendered two ways (client label vs. staff label)
-// off the same record, so the two audiences can't drift apart from each other.
-export const STATUS_META: Record<ReturnStatus, StatusMeta> = {
-  awaiting_documents: {
-    clientLabel: "Action needed: upload your documents",
-    staffLabel: "Awaiting Documents (Client)",
-    ownerRole: "client",
-    blocking: true,
-    milestone: 0,
-  },
-  // ...6 more statuses, same shape
-};
-```
-
-`StatusPill` and `StatusProgress` both just read this object — neither one hardcodes a label.
+- **Real persistence** — a database and API layer behind `data.ts`'s query functions, so uploads, messages, and edits survive a refresh instead of resetting on reload.
+- **A real LLM behind `ai-stub.ts`** — the seam is already isolated to a handful of functions; swapping the artificial delay for an actual model call shouldn't require touching the UI or call sites around it.
+- **Real authentication** — the role switcher becomes a login/session system, with the same role/permission logic already built around it.
+- **Reviewer and Firm Admin built out to the same depth as Client/Preparer**, rather than lighter adapted views.
+- **Automated tests around the ranking and permission logic specifically** — that's where the real bugs actually turned up during this build (a permission check that worked on the tab but not on a shortcut card three components away), and it's exactly the kind of regression unit tests are built to catch early.
 
 ---
 
 ## What's genuinely wired up vs. simulated
 
-**Real:** the Next.js app end to end — routing, all UI logic, the role-based permission system (enforced consistently across every path into a return, not just in the nav), the prioritization/ranking algorithms behind the dashboard, the status/progress state machine above, search/filter/pagination against a 249-document dataset, and the deep-linking/back-navigation trail connecting messages → tasks → documents → fields.
+**Real:** the Next.js app end to end — routing, all UI logic, the role-based permission system (enforced consistently across every path into a return, not just in the nav), the prioritization/ranking algorithms behind the dashboard, the status/progress state machine (`STATUS_META`, one record rendered as both a client label and a staff label so the two can't drift apart), search/filter/pagination against a 249-document dataset, and the deep-linking/back-navigation trail connecting messages → tasks → documents → fields.
 
 **Simulated, by design** — this is what "keep it quick and dirty, simulate the AI" meant in practice for a 10-challenge take-home, not a shortcut I'd defend for production:
 
